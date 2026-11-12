@@ -1,0 +1,118 @@
+{
+ "theme": {
+  "background": "#1e2629",
+  "foreground": "#c5c8c6"
+ },
+ "kinds": {
+  "comment": {
+   "color": "#6c7a80",
+   "italic": true
+  },
+  "string": {
+   "color": "#d4b87a"
+  },
+  "quote": {
+   "color": "#6c7a80"
+  },
+  "number": {
+   "color": "#de935f"
+  },
+  "keyword": {
+   "color": "#de935f"
+  },
+  "storage": {
+   "color": "#de935f"
+  },
+  "funcKw": {
+   "color": "#8abeb7"
+  },
+  "arrow": {
+   "color": "#8abeb7"
+  },
+  "modifier": {
+   "color": "#b894c0"
+  },
+  "constant": {
+   "color": "#b894c0"
+  },
+  "this": {
+   "color": "#6c7a80",
+   "italic": true
+  },
+  "function": {
+   "color": "#81a2be"
+  },
+  "param": {
+   "color": "#ab7651"
+  },
+  "support": {
+   "color": "#de935f"
+  },
+  "type": {
+   "color": "#cc6666"
+  },
+  "punct": {
+   "color": "#9098a0"
+  },
+  "tplPunct": {
+   "color": "#9098a0"
+  },
+  "tag": {
+   "color": "#b894c0"
+  },
+  "attr": {
+   "color": "#81a2be"
+  },
+  "entity": {
+   "color": "#de935f"
+  },
+  "jsonKey": {
+   "color": "#81a2be"
+  },
+  "jsonArray": {
+   "color": "#cc6666"
+  },
+  "yamlKey": {
+   "color": "#81a2be"
+  },
+  "cssValue": {
+   "color": "#6c7a80"
+  },
+  "heading": {
+   "color": "#b894c0"
+  },
+  "mdPunct": {
+   "color": "#6c7a80"
+  },
+  "mdLang": {
+   "color": "#cc6666"
+  },
+  "mdQuote": {
+   "color": "#6f774b"
+  },
+  "mdList": {
+   "color": "#a1a960"
+  },
+  "mdNum": {
+   "color": "#838b53"
+  },
+  "link": {
+   "color": "#81a2be"
+  },
+  "bold": {
+   "color": "#c5c8c6",
+   "bold": true
+  },
+  "italic": {
+   "color": "#c5c8c6",
+   "italic": true
+  }
+ },
+ "git": {
+  "U": "#73c991",
+  "A": "#81b88b",
+  "M": "#e2c08d",
+  "D": "#c74e39",
+  "!": "#e4676b"
+ }
+}

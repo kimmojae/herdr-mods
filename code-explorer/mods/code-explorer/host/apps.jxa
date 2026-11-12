@@ -1,0 +1,77 @@
+// osascript -l JavaScript apps.jxa <command> [args…]: asks macOS (NSWorkspace) about apps.
+//   editors              code editors in the Applications folders, as [{id, name, path, kind, cli}]:
+//                        VS Code forks (app/product.json + bin/<applicationName>), JetBrains IDEs,
+//                        and a few others by bundle id
+//   browsers             apps that open https: URLs, and the default one
+//   icon <app path>      the app's .icns path, or ""
+ObjC.import("AppKit");
+
+const fm = $.NSFileManager.defaultManager;
+const OTHER_EDITORS = ["dev.zed.Zed", "com.sublimetext.4", "com.sublimetext.3", "com.panic.Nova", "com.barebones.bbedit"];
+// JetBrains apps that aren't code editors: the Toolbox, the database IDE, remote dev's launcher.
+const NOT_EDITORS = ["com.jetbrains.toolbox", "com.jetbrains.datagrip", "com.jetbrains.gateway"];
+
+function info(url) {
+  if (!url || url.isNil()) return null;
+  const bundle = $.NSBundle.bundleWithURL(url);
+  const id = bundle.isNil() ? "" : ObjC.unwrap(bundle.bundleIdentifier);
+  const name = ObjC.unwrap(fm.displayNameAtPath(url.path)).replace(/\.app$/, "");
+  return { id, name, path: ObjC.unwrap(url.path) };
+}
+
+const list = (urls) => { const out = []; for (let i = 0; i < urls.count; i++) out.push(info(urls.objectAtIndex(i))); return out.filter(Boolean); };
+const exists = (p) => fm.fileExistsAtPath(p);
+
+function editorAt(path) {
+  const bundle = $.NSBundle.bundleWithPath(path);
+  if (bundle.isNil() || bundle.bundleIdentifier.isNil()) return null;
+  const app = info($.NSURL.fileURLWithPath(path));
+  const product = `${path}/Contents/Resources/app/product.json`;
+  if (exists(product)) {
+    try {
+      const name = JSON.parse(ObjC.unwrap($.NSString.stringWithContentsOfFileEncodingError(product, $.NSUTF8StringEncoding, null))).applicationName;
+      const cli = `${path}/Contents/Resources/app/bin/${name}`;
+      if (name && exists(cli)) return { ...app, kind: "vscode", cli };
+    } catch (e) {}
+  }
+  if ((app.id.startsWith("com.jetbrains.") && !NOT_EDITORS.includes(app.id.toLowerCase())) || app.id === "com.google.android.studio") {
+    return { ...app, kind: "jetbrains", cli: `${path}/Contents/MacOS/${ObjC.unwrap(bundle.objectForInfoDictionaryKey("CFBundleExecutable"))}` };
+  }
+  return OTHER_EDITORS.includes(app.id) ? { ...app, kind: "app" } : null;
+}
+
+function editors() {
+  const home = ObjC.unwrap($.NSHomeDirectory());
+  const seen = new Set(), out = [];
+  for (const dir of ["/Applications", `${home}/Applications`, `${home}/Applications/JetBrains Toolbox`]) {
+    const names = fm.contentsOfDirectoryAtPathError(dir, null);
+    if (names.isNil()) continue;
+    for (let i = 0; i < names.count; i++) {
+      const name = ObjC.unwrap(names.objectAtIndex(i));
+      if (!name.endsWith(".app")) continue;
+      const editor = editorAt(`${dir}/${name}`);
+      if (editor && !seen.has(editor.id)) { seen.add(editor.id); out.push(editor); }
+    }
+  }
+  return out;
+}
+
+function run(argv) {
+  const ws = $.NSWorkspace.sharedWorkspace;
+  const web = $.NSURL.URLWithString("https://example.com");
+  switch (argv[0]) {
+    case "editors":
+      return JSON.stringify(editors());
+    case "browsers":
+      return JSON.stringify({ browsers: list(ws.URLsForApplicationsToOpenURL(web)), default: info(ws.URLForApplicationToOpenURL(web)) });
+    case "icon": {
+      const bundle = $.NSBundle.bundleWithPath(argv[1]);
+      if (bundle.isNil()) return "";
+      const file = bundle.objectForInfoDictionaryKey("CFBundleIconFile");
+      if (file.isNil()) return "";
+      const name = ObjC.unwrap(file);
+      return `${argv[1]}/Contents/Resources/${name.endsWith(".icns") ? name : `${name}.icns`}`;
+    }
+  }
+  return "";
+}

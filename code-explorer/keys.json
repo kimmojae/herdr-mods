@@ -1,0 +1,17 @@
+{
+  "global": {
+    "cmd-e": {
+      "command": "layout.toggle",
+      "args": {
+        "id": "panel"
+      }
+    },
+    "cmd-alt-l": "code-explorer.toggle-appearance"
+  },
+  "mod:code-explorer": {
+    "cmd-alt-c": "code-explorer.copy-path",
+    "cmd-alt-shift-c": "code-explorer.copy-relative",
+    "cmd-alt-r": "code-explorer.reveal",
+    "ctrl-enter": "code-explorer.open-side"
+  }
+}
