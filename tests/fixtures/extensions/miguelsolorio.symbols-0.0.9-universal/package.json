@@ -1,0 +1,1 @@
+{"name":"symbols","publisher":"miguelsolorio","version":"0.0.9","contributes":{"iconThemes":[{"id":"symbols","label":"Symbol Icons","path":"./src/symbol-icon-theme.json"}]}}

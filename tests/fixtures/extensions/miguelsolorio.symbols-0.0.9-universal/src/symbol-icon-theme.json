@@ -1,0 +1,18 @@
+{
+  // comment line, as in the real theme
+  "iconDefinitions": {
+    "ts": { "iconPath": "./icons/files/ts.svg" },
+    "ts-types": { "iconPath": "./icons/files/ts-types.svg" },
+    "react-ts": { "iconPath": "./icons/files/react-ts.svg" },
+    "node": { "iconPath": "./icons/files/node.svg" },
+    "document": { "iconPath": "./icons/files/document.svg" },
+    "folder": { "iconPath": "./icons/folders/folder.svg" },
+    "folder-src": { "iconPath": "./icons/folders/folder-src.svg" },
+  },
+  "file": "document",
+  "folder": "folder",
+  "fileExtensions": { "ts": "ts", "d.ts": "ts-types", "tsx": "react-ts", "gone": "missing-def" },
+  "fileNames": { "Package.json": "node" },
+  "languageIds": { "typescript": "ts" },
+  "folderNames": { "src": "folder-src" },
+}

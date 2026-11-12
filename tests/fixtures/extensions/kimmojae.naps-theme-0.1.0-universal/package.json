@@ -1,0 +1,38 @@
+{
+  "name": "naps-theme",
+  "displayName": "Naps Theme",
+  "description": "A cozy, eye-friendly dark theme. So relaxing you might fall asleep.",
+  "icon": "images/icon.png",
+  "version": "0.1.0",
+  "publisher": "kimmojae",
+  "engines": {
+    "vscode": "^1.40.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "keywords": [
+    "theme",
+    "dark theme",
+    "naps",
+    "relaxed theme",
+    "easy on the eyes",
+    "cozy",
+    "dusk gold"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Naps Dusk Gold",
+        "uiTheme": "vs-dark",
+        "path": "./themes/naps-dusk-gold.json"
+      }
+    ]
+  },
+  "license": "MIT",
+  "__metadata": {
+    "installedTimestamp": 1793167717706,
+    "targetPlatform": "universal",
+    "size": 1429996
+  }
+}
