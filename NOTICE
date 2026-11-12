@@ -1,0 +1,18 @@
+herdr-mods
+Copyright 2026 kimmojae
+
+code-explorer started from the `files` mod that ships with Herdr Desktop
+(https://github.com/herdrdev/herdr-app, defaults/mods/files), licensed under
+the Apache License, Version 2.0.
+
+code-explorer's file and folder icons are generated from Symbols
+(https://github.com/miguelsolorio/vscode-symbols), Copyright (c) Miguel Solorio,
+licensed under the MIT License. The licence text ships beside the icons in
+code-explorer/mods/code-explorer/icons/LICENSE-symbols.txt.
+
+code-explorer/mods/code-explorer/ui/collapse.svg and ui/more.svg are Lucide's "chevrons-up" and
+"ellipsis" icons (https://lucide.dev), Copyright (c) Lucide Contributors, licensed under the ISC
+License. The licence text ships beside them in code-explorer/mods/code-explorer/ui/LICENSE-lucide.txt.
+
+The Naps themes (naps/themes/) and the Naps logo (naps/logo.png) come from the author's own Naps
+theme for VS Code (https://github.com/kimmojae/vscode-naps-theme), licensed under the MIT License.
