@@ -3,9 +3,10 @@
 // macOS only: elsewhere every list is empty.
 import { exec, appHome, shared, setShared, window, notify } from "herdr";
 import { sortEditors, pickDefaultEditor, openCommand } from "../lib/editors.js";
+import { DIR, key } from "../lib/name.js";
 
-const APPS = "code-explorer:apps", EDITOR = "code-explorer:editor";
-const script = () => `${appHome()}/mods/code-explorer/host/apps.jxa`;
+const APPS = key("apps"), EDITOR = key("editor");
+const script = () => `${appHome()}/${DIR}/host/apps.jxa`;
 // The platform, or null while Herdr hasn't said yet (it can be, as a copy starts).
 const platform = () => window()?.platform ?? null;
 const NONE = { editors: [], browsers: [], defaultBrowser: null };
@@ -17,7 +18,7 @@ async function ask(...args) {
 }
 
 // 64 px, sharp at 18 px on a 2× screen; the size is in the name so older 32 px copies aren't reused.
-export const iconPath = (app) => `mods/code-explorer/.cache/apps/${app.id || app.name}-64.png`;
+export const iconPath = (app) => `${DIR}/.cache/apps/${app.id || app.name}-64.png`;
 
 // One PNG per app, made once from its .icns.
 async function ensureIcon(app) {

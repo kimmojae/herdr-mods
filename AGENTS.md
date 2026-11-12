@@ -26,8 +26,10 @@ How each package looks and behaves, and what it is built from: its `RECIPE.md`
 - After changing anything under `code-explorer/` or `naps/`: `npm run sync`, then confirm
   `herdr-app check` passed and `herdr-app status` shows `"errors": []`. Look at the window with
   `herdr-app shot` before calling a UI change done.
-- Sync installs layouts as `<name>-test` (`naps-test`): that is the working copy; the released
-  name (`naps`) is what people get from GitHub.
+- Sync installs a working copy beside the released packages people get from GitHub: the mod as
+  `code-explorer-test` (with its `mod:code-explorer-test` keys), layouts as `<name>-test`, and a
+  `code-explorer-test` layout (naps with the copy in Files). Try changes there;
+  `npm run sync -- --clean` removes it all. The mod's name lives only in `lib/name.js`.
 
 ## When Symbols or Naps updates in Cursor
 

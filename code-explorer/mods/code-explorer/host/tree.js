@@ -5,6 +5,7 @@ import { div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, window, appHome, nextCommand } from "herdr";
 import { parseStatus, folderMarks, markOf } from "../lib/status.js";
+import { NAME, DIR, key as prefKey } from "../lib/name.js";
 import { resolveIcon } from "../lib/icons.js";
 import { parseIgnored, isIgnored, isExcluded } from "../lib/ignore.js";
 import { relativeTo } from "../lib/paths.js";
@@ -22,7 +23,7 @@ function loadPrefs() {
   const out = { ...PREFS };
   for (const key of Object.keys(PREFS)) {
     try {
-      const v = localStorage.getItem(`code-explorer:${key}`);
+      const v = localStorage.getItem(prefKey(key));
       if (v !== null) out[key] = JSON.parse(v);
     } catch {}
   }
@@ -30,11 +31,11 @@ function loadPrefs() {
 }
 function setPref(view, key, value) {
   view.prefs[key] = value;
-  try { localStorage.setItem(`code-explorer:${key}`, JSON.stringify(value)); } catch {}
+  try { localStorage.setItem(prefKey(key), JSON.stringify(value)); } catch {}
 }
 
 const PER_FOLDER = 500, TOTAL = 5000;
-const UI = "mods/code-explorer/ui";
+const UI = `${DIR}/ui`;
 
 async function directory(path, on) {
   const windowsDirectory = async () => {
@@ -81,7 +82,7 @@ export const treeMethods = {
     this.prefs = loadPrefs();
     this.iconMap = null;
     cx.spawn(async cx => {
-      try { this.iconMap = JSON.parse(await readTextFile(`${appHome()}/mods/code-explorer/icons.json`)); } catch { this.iconMap = null; }
+      try { this.iconMap = JSON.parse(await readTextFile(`${appHome()}/${DIR}/icons.json`)); } catch { this.iconMap = null; }
       cx.notify();
     });
     this.findApps(cx);
@@ -101,7 +102,7 @@ export const treeMethods = {
   location() {
     const space = spaces().find(s => s.active), f = focused();
     const pane = f?.pane ? panes().find(p => p.pane === f.pane) : null;
-    if (pane?.mod === "code-explorer") {
+    if (pane?.mod === NAME) {
       // A viewer: the tree shows the folder its file was opened from.
       const entry = Object.values(viewerEntries()).find(e => e.tab === pane.tab && e.space === space?.id);
       if (entry?.file?.root) return (this.place = { cwd: entry.file.root, on: entry.file.on ?? null, space: space?.id });
@@ -306,7 +307,7 @@ export const treeMethods = {
   activePath() {
     const f = focused();
     const pane = f?.pane ? panes().find(p => p.pane === f.pane) : null;
-    if (pane?.mod !== "code-explorer") return null;
+    if (pane?.mod !== NAME) return null;
     const entry = Object.values(viewerEntries()).find(e => e.tab === pane.tab);
     return entry?.file ? relativeTo(this.root, entry.file.path) : null;
   },
@@ -431,7 +432,7 @@ export const treeMethods = {
     this.follow(cx);
     pruneViewers(this.startedAt);
     const t = theme();
-    return v_flex().id("code-explorer").size_full().min_h(0).rounded(10).overflow_hidden().bg(t.chrome).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
+    return v_flex().id(NAME).size_full().min_h(0).rounded(10).overflow_hidden().bg(t.chrome).border_1().border_color(t.border).text_color(t.foreground).text_size(13)
       .track_focus(this.treeFocus).on_key_down((e, cx) => this.treeKey(e, cx))
       .child(this.header(t))
       .child(v_flex().id("files-tree").flex_1().min_h(0).overflow_y_scrollbar().p(6)

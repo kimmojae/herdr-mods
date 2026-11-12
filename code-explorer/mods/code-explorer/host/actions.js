@@ -3,8 +3,9 @@
 import { exec, run, notify, shared, setShared, settings, appHome } from "herdr";
 import * as fs from "fs/promises";
 import { flipAppearance } from "../lib/appearance.js";
+import { key } from "../lib/name.js";
 
-const MENU_KEY = "code-explorer:menu";
+const MENU_KEY = key("menu");
 
 async function program(cmd, args, what) {
   const r = await exec(cmd, args).catch((e) => ({ code: 1, stderr: String(e) }));
@@ -19,7 +20,7 @@ export const openInTerminal = (space, folder) => run("tab.new", { space, folder 
 
 // Light ↔ dark (the viewer's ☀︎/☾ and ⌘⌥L). Every copy of the mod that sees the key calls this;
 // the first within half a second flips, the rest would only flip it back.
-const FLIPPED = "code-explorer:appearance-at";
+const FLIPPED = key("appearance-at");
 export async function toggleAppearance() {
   if (Date.now() - (shared(FLIPPED) ?? 0) < 500) return;
   setShared(FLIPPED, Date.now());

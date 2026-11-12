@@ -8,6 +8,7 @@ import { v_flex } from "gpui-base";
 import { props, panes, spaces, focused, shared, setShared, run, theme, readTextFile, watchFolder, exec, appHome, nextCommand } from "herdr";
 import * as fs from "fs/promises";
 import { newViewerId, findOpen, previewEntry, claimTab, prune } from "../lib/registry.js";
+import { NAME, DIR, key } from "../lib/name.js";
 import { baseName, parentOf, viewerKind, extOf } from "../lib/paths.js";
 import { highlight } from "../lib/highlight.js";
 import { parseHunks, allAdded } from "../lib/hunks.js";
@@ -16,10 +17,10 @@ import { cacheName, staleFiles } from "../lib/cache.js";
 import { openWith, defaultEditor } from "./apps.js";
 import { toggleAppearance } from "./actions.js";
 
-const VIEWERS = "code-explorer:viewers";
+const VIEWERS = key("viewers");
 const MAX_CHARS = 400000, IMAGE_MAX = 20 * 1024 * 1024;
 export const HIGHLIGHT_CHARS = 200000; // longer files are drawn plain
-export const MOD = "mods/code-explorer";
+export const MOD = DIR;
 const COPY = 'mkdir -p -- "$(dirname -- "$2")" && { cmp -s -- "$1" "$2" || cp -- "$1" "$2"; }';
 
 export const viewerEntries = () => shared(VIEWERS) ?? {};
@@ -30,7 +31,7 @@ export function setEntry(id, change) {
 }
 
 /** Tabs that hold a code-explorer pane (viewers; the sidebar is a layout block, not a pane). */
-export const viewerTabs = () => new Set(panes().filter((p) => p.mod === "code-explorer").map((p) => p.tab));
+export const viewerTabs = () => new Set(panes().filter((p) => p.mod === NAME).map((p) => p.tab));
 
 export const activeSpace = () => spaces().find((s) => s.active)?.id;
 // test(1), not fs: Herdr's fs reads only under the home folder.
@@ -39,7 +40,7 @@ const exists = (p) => exec("test", ["-e", p]).then((r) => r.code === 0, () => fa
 function newViewer(file, space, preview, diff) {
   const id = newViewerId(Date.now(), Math.random());
   setEntry(id, { space, file, preview, diff, tab: null, others: [...viewerTabs()], at: Date.now() });
-  run("tab.new", { space, name: baseName(file.path), mod: "code-explorer", props: { mode: "viewer", viewer: id, space, file } });
+  run("tab.new", { space, name: baseName(file.path), mod: NAME, props: { mode: "viewer", viewer: id, space, file } });
 }
 
 /**
@@ -67,7 +68,7 @@ export function openFile(file, how = "preview", { diff = false } = {}) {
   if (how === "side") {
     const id = newViewerId(Date.now(), Math.random());
     setEntry(id, { space, file, preview: false, diff, tab: focused()?.tab ?? null, others: [], at: Date.now() });
-    run("pane.split", { direction: "right", mod: "code-explorer", props: { mode: "viewer", viewer: id, space, file } });
+    run("pane.split", { direction: "right", mod: NAME, props: { mode: "viewer", viewer: id, space, file } });
     return;
   }
   const preview = how === "preview" ? previewEntry(entries, space) : null;

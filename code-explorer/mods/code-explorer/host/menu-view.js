@@ -5,6 +5,7 @@ import { div, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { props, closeOverlay, openOverlay, theme, settings } from "herdr";
 import { menuGroups, headerGroups } from "../lib/menu.js";
+import { NAME } from "../lib/name.js";
 import { editorChoices, browserChoices } from "../lib/openwith.js";
 import { revealInFinder, openInTerminal, copyText, askSidebar, toggleAppearance } from "./actions.js";
 import { installedApps, iconPath, openWith, defaultEditor, setDefaultEditor, defaultBrowser, refreshAppsIfStale } from "./apps.js";
@@ -67,7 +68,7 @@ export function openMenu(target, space) {
     ...groups.flat().filter((it) => it.submenu).map((it) => sub(it.submenu)));
   // A viewer ▾: that list by itself.
   if (target.startIn) height = PAD * 2 + 2 + Math.max(1, rows[target.startIn]) * ROW;
-  openOverlay({ mod: "code-explorer", kind: "popup", frame: "none", width: WIDTH, height, props: { mode: "menu", target, space, height } });
+  openOverlay({ mod: NAME, kind: "popup", frame: "none", width: WIDTH, height, props: { mode: "menu", target, space, height } });
 }
 
 // Side (⌘-click) and editor (its buttons) have their own ways in, so a click only previews or pins.

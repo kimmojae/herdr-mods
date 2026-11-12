@@ -2,7 +2,9 @@
 // name, then the longest extension ("a.d.ts" tries "d.ts" before "ts"), then the language the
 // extension stands for, then the default.
 
-const BASE = "mods/code-explorer/";
+import { DIR } from "./name.js";
+
+const BASE = `${DIR}/`;
 
 // Extensions VS Code knows by language id; Symbols maps many of these only through languageIds.
 const LANGUAGE_IDS = {
