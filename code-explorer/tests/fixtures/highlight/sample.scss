@@ -1,0 +1,3 @@
+// vars
+$gap: 8px;
+.btn { &:focus { padding: $gap * 2; } @include round(4px); }

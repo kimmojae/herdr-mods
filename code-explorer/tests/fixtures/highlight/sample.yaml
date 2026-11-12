@@ -1,0 +1,16 @@
+---
+# config
+name: "Code Explorer"
+version: 0.1
+enabled: yes
+items:
+  - id: 1
+    note: 'it''s'
+  - &anchor plain text # trailing
+  - [a, b, {c: d}]
+script: |
+  echo hi
+  exit 0
+after: ~
+"quoted key": 0x1F
+...

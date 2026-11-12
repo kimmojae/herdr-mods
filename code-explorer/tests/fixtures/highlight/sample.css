@@ -1,0 +1,5 @@
+/* theme */
+@media (max-width: 600px) {
+  .card:hover > a::before, #main { color: #81a2be !important; margin: 0 -2px .5em; }
+}
+:root { --accent: rgb(129, 162, 190); background: url("a b.png"); }

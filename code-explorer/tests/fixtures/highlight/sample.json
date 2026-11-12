@@ -1,0 +1,5 @@
+{
+  // settings
+  "name": "code-explorer", "version": 1.5e3, "tags": ["a", "b"],
+  "nested": { "ok": true, "none": null, "neg": -2 }, /* block */ "x": "unterminated
+}
