@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 // Installs a working copy of this repo's packages into a Herdr home, beside the released ones
-// people get from GitHub: the mod as code-explorer-test (with its keys), layouts as <name>-test,
-// and a code-explorer-test layout (naps with the copy in its Files panel). Copies, not links:
-// Herdr won't load icons through a link. Runs `herdr-app check` on the copy.
-// --clean removes all of that again; themes stay, as the released naps uses them too.
-// Usage: node scripts/sync.mjs [--home <dir>] [--no-check] [--dry-run] [--clean]
+// people get from GitHub, which it never touches:
+//   code-explorer  the mod as code-explorer-test (with its keys) and a code-explorer-test layout
+//                  (naps with the copy in its Files panel, in the released Naps themes)
+//   naps           layouts and themes as <name>-test, the layouts pointing at the -test themes
+// Both when none is named. Copies, not links: Herdr won't load icons through a link. Runs
+// `herdr-app check` on the mod's copy. --clean removes the named packages' copies again.
+// Usage: node scripts/sync.mjs [--home <dir>] [--no-check] [--dry-run] [--clean] [code-explorer] [naps]
 import { readdir, readFile, writeFile, mkdir, cp, rm, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, relative } from "node:path";
@@ -14,19 +16,22 @@ import { promisify } from "node:util";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const MOD = "code-explorer", COPY = `${MOD}-test`;
+const PACKAGES = [MOD, "naps"];
 const test = (n) => n.replace(/\.json$/, "-test.json");
 // Herdr writes these into a mod folder itself; the cache is the mod's runtime state.
 const KEEP = (rel) => /^\.?cache(\/|$)/.test(rel) || rel.endsWith(".d.ts") || rel === "jsconfig.json";
 
 function args(argv) {
-  const out = { home: process.env.HERDR_APP_HOME || join(homedir(), ".config/herdr-app"), check: true, dry: false, clean: false };
+  const out = { home: process.env.HERDR_APP_HOME || join(homedir(), ".config/herdr-app"), check: true, dry: false, clean: false, packages: new Set() };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--home") out.home = argv[++i];
     else if (argv[i] === "--no-check") out.check = false;
     else if (argv[i] === "--dry-run") out.dry = true;
     else if (argv[i] === "--clean") out.clean = true;
+    else if (PACKAGES.includes(argv[i])) out.packages.add(argv[i]);
     else throw new Error(`unknown argument: ${argv[i]}`);
   }
+  if (!out.packages.size) out.packages = new Set(PACKAGES);
   return out;
 }
 
@@ -63,22 +68,34 @@ async function syncMod(home, dry) {
   return to;
 }
 
-// `rename` maps a repo file name to the installed one.
-async function syncFolder(home, sub, dry, rename = (n) => n) {
-  const from = join(ROOT, "naps", sub);
-  if (!(await exists(from))) return [];
-  const names = (await readdir(from)).filter((n) => !n.startsWith("."));
+const napsFiles = async (sub) => (await exists(join(ROOT, "naps", sub))) ? (await readdir(join(ROOT, "naps", sub))).filter((n) => !n.startsWith(".")) : [];
+
+// naps's themes and layouts as <name>-test; a layout's Naps themes become their -test copies.
+async function syncNaps(home, dry) {
+  const themes = await napsFiles("themes"), own = new Set(themes.map((n) => n.replace(/\.json$/, "")));
   if (!dry) {
-    await mkdir(join(home, sub), { recursive: true });
-    for (const n of names) await cp(join(from, n), join(home, sub, rename(n)), { force: true });
+    await mkdir(join(home, "themes"), { recursive: true });
+    for (const n of themes) await cp(join(ROOT, "naps/themes", n), join(home, "themes", test(n)), { force: true });
   }
-  console.log(`naps/${sub}: ${names.map(rename).join(", ")}`);
-  return names;
+  console.log(`naps/themes: ${themes.map(test).join(", ")}`);
+  const layouts = await napsFiles("layouts");
+  if (!dry) {
+    await mkdir(join(home, "layouts"), { recursive: true });
+    for (const n of layouts) {
+      const from = join(ROOT, "naps/layouts", n);
+      if (!n.endsWith(".json")) { await cp(from, join(home, "layouts", n), { force: true }); continue; }
+      const layout = JSON.parse(await readFile(from, "utf8"));
+      for (const mode of ["light", "dark"]) if (own.has(layout.theme?.[mode])) layout.theme[mode] += "-test";
+      await writeFile(join(home, "layouts", test(n)), JSON.stringify(layout, null, 2) + "\n");
+    }
+  }
+  console.log(`naps/layouts: ${layouts.map(test).join(", ")}`);
 }
 
 // naps with the copy in its Files panel, where the mod is tried out.
 async function devLayout(home, dry) {
   const text = await readFile(join(ROOT, "naps/layouts/naps.json"), "utf8");
+  if (!dry) await mkdir(join(home, "layouts"), { recursive: true });
   if (!dry) await writeFile(join(home, "layouts", `${COPY}.json`), text.replace(/"mod": "files"/g, `"mod": "${COPY}"`));
   console.log(`layout: ${COPY}.json`);
 }
@@ -98,26 +115,30 @@ async function devKeys(home, dry, add) {
   console.log(`keys.json: ${add ? "added" : "removed"} ${section}`);
 }
 
-async function clean(home, dry) {
-  const layouts = (await exists(join(ROOT, "naps/layouts"))) ? await readdir(join(ROOT, "naps/layouts")) : [];
-  const gone = [join("mods", COPY), join("layouts", `${COPY}.json`), ...layouts.map((n) => join("layouts", test(n)))];
+async function clean(home, dry, packages) {
+  const gone = [];
+  if (packages.has(MOD)) gone.push(join("mods", COPY), join("layouts", `${COPY}.json`));
+  if (packages.has("naps")) {
+    for (const n of await napsFiles("themes")) gone.push(join("themes", test(n)));
+    for (const n of await napsFiles("layouts")) if (n.endsWith(".json")) gone.push(join("layouts", test(n)));
+  }
   for (const rel of gone) {
     if (!(await exists(join(home, rel)))) continue;
     if (!dry) await rm(join(home, rel), { recursive: true });
     console.log(`removed ${rel}`);
   }
-  await devKeys(home, dry, false);
+  if (packages.has(MOD)) await devKeys(home, dry, false);
 }
 
 const opts = args(process.argv.slice(2));
 if (opts.dry) console.log("(dry run: nothing is written)");
 if (opts.clean) {
-  await clean(opts.home, opts.dry);
+  await clean(opts.home, opts.dry, opts.packages);
   process.exit(0);
 }
+if (opts.packages.has("naps")) await syncNaps(opts.home, opts.dry);
+if (!opts.packages.has(MOD)) process.exit(0);
 const modDir = await syncMod(opts.home, opts.dry);
-await syncFolder(opts.home, "themes", opts.dry);
-await syncFolder(opts.home, "layouts", opts.dry, test);
 await devLayout(opts.home, opts.dry);
 await devKeys(opts.home, opts.dry, true);
 if (opts.check && !opts.dry) {

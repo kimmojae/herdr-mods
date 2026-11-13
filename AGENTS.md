@@ -23,13 +23,15 @@ How each package looks and behaves, and what it is built from: its `RECIPE.md`
 - Mod code: no HTML/CSS/web views, no `setTimeout` (use `cx.timer`), never keep a `cx`,
   colours from `theme()` names (generated syntax colours excepted).
 - Pass file paths to programs as separate arguments, never inside a shell string.
-- After changing anything under `code-explorer/` or `naps/`: `npm run sync`, then confirm
-  `herdr-app check` passed and `herdr-app status` shows `"errors": []`. Look at the window with
-  `herdr-app shot` before calling a UI change done.
-- Sync installs a working copy beside the released packages people get from GitHub: the mod as
-  `code-explorer-test` (with its `mod:code-explorer-test` keys), layouts as `<name>-test`, and a
-  `code-explorer-test` layout (naps with the copy in Files). Try changes there;
-  `npm run sync -- --clean` removes it all. The mod's name lives only in `lib/name.js`.
+- After changing a package, sync just that one: `npm run sync -- code-explorer` or
+  `npm run sync -- naps` (both when none is named), then confirm `herdr-app check` passed and
+  `herdr-app status` shows `"errors": []`. Look at the window with `herdr-app shot` before
+  calling a UI change done.
+- Sync installs a working copy beside the released packages people get from GitHub, and never
+  touches those: the mod as `code-explorer-test` (with its `mod:code-explorer-test` keys) and a
+  `code-explorer-test` layout (naps with the copy in Files, in the released Naps themes); naps's
+  layouts and themes as `<name>-test`. Try changes there; `npm run sync -- --clean [package]`
+  removes them. The mod's name lives only in `lib/name.js`.
 
 ## When Symbols or Naps updates in Cursor
 
@@ -37,7 +39,7 @@ How each package looks and behaves, and what it is built from: its `RECIPE.md`
    `syntax/*.json` and `naps/themes/*.json` from the newest extension versions in
    `~/.cursor/extensions`.
 2. Review the diff.
-3. `npm run sync`.
+3. `npm run sync` (both packages).
 
 ## Screenshots
 

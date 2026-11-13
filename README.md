@@ -28,7 +28,8 @@ regenerates them; nothing watches in the background.
 npm test          # node --test, no dependencies
 npm run import    # regenerate icons, themes and code colours from Cursor's extensions
 npm run sync      # install a -test working copy into ~/.config/herdr-app and run herdr-app check
-npm run sync -- --clean   # remove the -test copy again
+npm run sync -- code-explorer   # just one package (or naps)
+npm run sync -- --clean   # remove the -test copy again (or --clean naps)
 ```
 
 [AGENTS.md](AGENTS.md) has the rules for working on this repo; each package's `RECIPE.md` says
