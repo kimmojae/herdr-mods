@@ -78,7 +78,7 @@ export const treeMethods = {
     });
     this.saved = new Map();
     this.entries = new Map(); this.folders = new Set(); this.pending = new Set(); this.marks = {}; this.folderMarks = new Map();
-    this.ignored = new Set(); this.top = null;
+    this.ignored = new Map(); this.tops = new Map(); this.top = null;
     this.prefs = loadPrefs();
     this.iconMap = null;
     cx.spawn(async cx => {
@@ -151,7 +151,7 @@ export const treeMethods = {
       const saved = this.saved.get(next);
       this.context = { key: next, cwd, on }; this.root = cwd; this.on = on; this.entries = new Map(); this.folders = new Set(saved?.folders);
       this.sel = null; this.followed = null;
-      this.pending = new Set(); this.marks = {}; this.folderMarks = new Map(); this.ignored = new Set(); this.top = null;
+      this.pending = new Set(); this.marks = {}; this.folderMarks = new Map(); this.ignored = new Map(); this.tops = new Map(); this.top = null;
       this.watched = null; this.error = null; this.limited = false;
       this.loading = false;
     }
@@ -174,36 +174,57 @@ export const treeMethods = {
   },
 
   // Writes nothing under .git (index lock, fsmonitor cookie): the folder watch would refresh again.
+  // The tree's folder may sit in one repository or hold several (a folder of clones), so each open
+  // folder's repository is looked up once and every repository found is asked.
   async loadGit(context) {
     const { cwd, on } = context;
-    const top = await exec("git", ["rev-parse", "--show-toplevel"], { cwd, on }).catch(() => null);
-    let marks = {}, ignored = new Set(), topDir = null;
-    if (top?.code === 0) {
-      topDir = top.stdout.trim();
+    const tops = this.tops;
+    for (const path of tops.keys()) if (path && !this.folders.has(path)) tops.delete(path); // closed since
+    await Promise.all(["", ...this.folders].filter(path => !tops.has(path)).map(async path => {
+      const r = await exec("git", ["rev-parse", "--show-toplevel"], { cwd: path ? `${cwd}/${path}` : cwd, on }).catch(() => null);
+      tops.set(path, r?.code === 0 ? r.stdout.trim() : null);
+    }));
+    const marks = {}, ignored = new Map(), folders = new Map();
+    await Promise.all([...new Set(tops.values())].filter(Boolean).map(async topDir => {
       const git = (args) => exec("git", ["--no-optional-locks", "-c", "core.fsmonitor=false", ...args], { cwd: topDir, on }).catch(() => null);
       const [status, ignoredOut] = await Promise.all([
         git(["status", "--porcelain=v1", "-z", "--no-renames", "--untracked-files=all"]),
         git(["ls-files", "--others", "--ignored", "--exclude-standard", "--directory", "-z"]),
       ]);
-      if (status?.code === 0) marks = parseStatus(status.stdout, topDir);
-      if (ignoredOut?.code === 0) ignored = parseIgnored(ignoredOut.stdout);
-    }
-    if (this.current(context)) { this.marks = marks; this.folderMarks = folderMarks(marks, topDir ?? context.cwd); this.ignored = ignored; this.top = topDir; }
+      if (status?.code === 0) {
+        const own = parseStatus(status.stdout, topDir);
+        Object.assign(marks, own);
+        for (const [dir, mark] of folderMarks(own, topDir)) folders.set(dir, mark);
+      }
+      if (ignoredOut?.code === 0) ignored.set(topDir, parseIgnored(ignoredOut.stdout));
+    }));
+    if (this.current(context) && this.tops === tops) { this.marks = marks; this.folderMarks = folders; this.ignored = ignored; this.top = tops.get("") ?? null; }
   },
 
-  // `path` relative to the tree's root → whether git ignores it.
+  // The repository holding tree path `path`: that of the nearest open folder at or above it.
+  repoOf(path) {
+    for (let p = path; ; p = p.slice(0, Math.max(0, p.lastIndexOf("/")))) {
+      if (this.tops.has(p)) return this.tops.get(p);
+      if (!p) return null;
+    }
+  },
+
+  // `path` relative to the tree's root → whether git ignores it (a repository's own folder is
+  // asked of the one around it).
   ignoredRow(path, dir) {
-    if (!this.top || !this.ignored.size) return false;
-    const base = relativeTo(this.top.normalize("NFC"), this.root.normalize("NFC"));
-    if (base === null) return false;
-    return isIgnored(this.ignored, base ? `${base}/${path}` : path, dir);
+    const top = this.repoOf(path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "");
+    const set = top && this.ignored.get(top);
+    if (!set?.size) return false;
+    const rel = relativeTo(top.normalize("NFC"), `${this.root}/${path}`.normalize("NFC"));
+    return rel ? isIgnored(set, rel, dir) : false;
   },
 
   // What a menu needs to know about a row (plain data: it crosses to the menu's copy).
   targetOf(path, dir) {
     const abs = path ? `${this.root}/${path}` : this.root;
-    const rel = this.top ? (relativeTo(this.top, abs) ?? path) : path;
-    return { path: abs, rel, treePath: path, root: this.root, top: this.top, dir, on: this.on ?? null, open: dir && this.folders.has(path), isRoot: !path,
+    const top = this.repoOf(path);
+    const rel = top ? (relativeTo(top, abs) ?? path) : path;
+    return { path: abs, rel, treePath: path, root: this.root, top, dir, on: this.on ?? null, open: dir && this.folders.has(path), isRoot: !path,
       changed: !dir && this.marks[abs.normalize("NFC")] === "M" };
   },
 
@@ -247,7 +268,10 @@ export const treeMethods = {
         const context = this.context;
         this.pending.add(path);
         cx.spawn(async cx => {
-          try { await this.loadFolder(path, context); }
+          try {
+            await this.loadFolder(path, context);
+            if (this.current(context) && !this.tops.has(path)) await this.loadGit(context); // a repository inside, at once
+          }
           catch (e) { if (this.current(context)) this.error = String(e); }
           finally { if (this.context === context) this.pending.delete(path); cx.notify(); }
         });
