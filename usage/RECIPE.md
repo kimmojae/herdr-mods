@@ -38,8 +38,10 @@ the bottom status row, one panel. This is the brief; the files beside it are one
   of a close is ignored).
 - Footer, 34px: `updated just now` / `updated N min ago` left, `↻ refresh` right.
 - Esc or a click outside closes it; so does the button or `⌘⌥U` again. It opens above the
-  button, right edges lined up, once the pointer has crossed the button; before that (a first
-  `⌘⌥U`), at the pointer: a mod can't learn where its block is without a pointer event.
+  button, right edges lined up, 6px apart. A mod learns where its block is only from a pointer
+  event, so the button's place is kept (shared `usage:place`) as its distance from the window's
+  bottom-right corner, which holds when the window is resized and after a restart; before the
+  pointer has ever crossed it, it is taken to be the right end of a 28px status row.
 
 ## Where the numbers come from
 

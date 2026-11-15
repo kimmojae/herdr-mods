@@ -6,6 +6,7 @@ import { theme, shared, setShared, openOverlay, closeOverlay, nextCommand, run, 
 import { NAME, key } from "../lib/name.js";
 import { left, panelHeight } from "../lib/format.js";
 import { ownBlock, fitWidth, SIDE } from "../lib/layout.js";
+import { offsetsOf, panelAt, GUESS } from "../lib/place.js";
 import { poll, loadReadings } from "./poll.js";
 import { logo, bar, mono } from "./look.js";
 import { PANEL_WIDTH } from "./panel.js";
@@ -17,7 +18,6 @@ const SAME_CLICK = 400;
 
 export const barMethods = {
   initBar(cx) {
-    this.anchor = null; // the button's window position, learnt from the pointer
     // Shared state outlives a restart; a panel open then is gone now.
     if (shared(key("open"))) setShared(key("open"), null);
     this.refresh(cx);
@@ -41,7 +41,7 @@ export const barMethods = {
     });
   },
 
-  // Above the button, right edges lined up; at the pointer until the button's place is known.
+  // Above the button, right edges lined up (see lib/place.js).
   toggle() {
     const open = shared(key("open"));
     if (open) { closeOverlay(open); setShared(key("open"), null); return; }
@@ -52,9 +52,7 @@ export const barMethods = {
   openPanel() {
     const height = panelHeight(loadReadings());
     this.openHeight = height;
-    const at = this.anchor
-      ? { x: Math.max(8, this.anchor.x + this.anchor.width - PANEL_WIDTH), y: Math.max(8, this.anchor.y - height - 6) }
-      : "pointer";
+    const at = this.view ? panelAt(shared(key("place")) ?? GUESS, this.view, height, PANEL_WIDTH) : "pointer";
     const id = openOverlay({ mod: NAME, kind: "popup", frame: "none", width: PANEL_WIDTH, height, at, props: { mode: "panel" } });
     setShared(key("open"), id);
   },
@@ -67,9 +65,12 @@ export const barMethods = {
     if (px) run("layout.resize", { id: block.id, px });
   },
 
-  learnAnchor(e) {
-    if (!e?.local_position) return;
-    this.anchor = { x: e.position.x - e.local_position.x, y: e.position.y - e.local_position.y, width: this.buttonWidth ?? 0 };
+  // The pointer on the button tells where it is; kept in shared state for the next start.
+  learnPlace(e) {
+    if (!this.view || !e?.local_position) return;
+    const bounds = e.bounds ?? { x: e.position.x - e.local_position.x, y: e.position.y - e.local_position.y, width: this.buttonWidth ?? 0 };
+    const place = offsetsOf(bounds, this.view), now = shared(key("place"));
+    if (now?.right !== place.right || now?.bottom !== place.bottom) setShared(key("place"), place);
   },
 
   item(r, t, nowS) {
@@ -106,6 +107,7 @@ export const barMethods = {
 
   barView() {
     const t = theme(), nowS = Date.now() / 1000;
+    this.view = window.viewport_size(); // gpui's window, not herdr's window()
     const readings = loadReadings();
     this.fitPanel(readings);
     const open = Boolean(shared(key("open")));
@@ -115,8 +117,8 @@ export const barMethods = {
         .accessibility_label("Usage limits").tooltip("Usage limits (⌘⌥U)")
         .when(open, (el) => el.bg(t.selected)).when(!open, (el) => el.hover((s) => s.bg(t.hover)))
         .on_size_change((size) => this.fitBlock(size.width))
-        .on_mouse_move((e) => this.learnAnchor(e))
-        .on_mouse_down("left", (e) => this.learnAnchor(e))
+        .on_mouse_move((e) => this.learnPlace(e))
+        .on_mouse_down("left", (e) => this.learnPlace(e))
         .on_click((_e, cx) => { this.toggle(); cx.notify(); })
         .when(readings.length === 0, (el) => el.child(div().text_size(11).text_color(t.dim).child(this.polling ? "Usage…" : "No accounts")))
         .children(readings.map((r) => this.item(r, t, nowS))));
