@@ -1,0 +1,7 @@
+#!/bin/sh
+# Stands in for `codex app-server`: answers request 2 after initialize and initialized.
+[ "$1" = app-server ] || exit 3
+read -r a; read -r b; read -r c
+case $c in *account/rateLimits/read*) ;; *) exit 3 ;; esac
+printf '%s\n' '{"id":1,"result":{}}' '{"id":2,"result":{"rateLimits":{"primary":{"usedPercent":8,"windowDurationMins":300,"resetsAt":1794596879},"secondary":{"usedPercent":29,"windowDurationMins":10080,"resetsAt":1794817608},"planType":"plus"}}}'
+sleep 30
