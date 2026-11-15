@@ -7,6 +7,8 @@ account at once: what's left of each window and when it resets.
 
 Bars and numbers show what's **left**. Under 30% left, they turn orange.
 
+![usage](preview.png)
+
 ## Install
 
 Copy `mods/usage/` into `~/.config/herdr-app/mods/`. Then, in a layout of yours (a clone of

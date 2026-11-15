@@ -2,6 +2,7 @@
 
 What's left of each Claude Code account's and Codex's 5-hour and 7-day limits: one button in
 the bottom status row, one panel. This is the brief; the files beside it are one build.
+![usage](preview.png)
 
 ## What you see
 
