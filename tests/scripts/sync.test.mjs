@@ -45,51 +45,118 @@ test("the installed copy knows its own name", async () => {
   assert.match(name, /NAME = "code-explorer-test"/);
 });
 
-test("sync installs layouts and themes with -test, and a code-explorer-test layout that uses the copy", async () => {
+const LAYOUT = "layouts/herdr-mods-test.json";
+
+test("sync builds one herdr-mods-test layout with every working copy in it", async () => {
   const dir = await home();
   await run("--home", dir, "--no-check");
   assert.ok(await exists(join(dir, "themes/naps-dusk-gold-test.json")));
   assert.equal(await exists(join(dir, "themes/naps-dusk-gold.json")), false);
   assert.equal(await readFile(join(dir, "themes/naps.json"), "utf8"), "released");
-  assert.ok(await exists(join(dir, "layouts/naps-test.json")));
-  assert.equal(await exists(join(dir, "layouts/naps.json")), false);
-  assert.equal((await json(join(dir, "layouts/naps-test.json"))).theme.dark, "naps-dusk-gold-test");
-  const dev = await readFile(join(dir, "layouts/code-explorer-test.json"), "utf8");
-  assert.match(dev, /"mod": "code-explorer-test"/);
-  assert.doesNotMatch(dev, /"mod": "files"/);
-  // The released (GitHub) themes: the mod is tried in the look people have.
-  assert.equal(JSON.parse(dev).theme.dark, "naps-dusk-gold");
+  const layout = await readFile(join(dir, LAYOUT), "utf8");
+  assert.match(layout, /"mod": "code-explorer-test"/);
+  assert.doesNotMatch(layout, /"mod": "files"/);
+  assert.match(layout, /"mod": "usage-test"/);
+  assert.match(layout, /"mod": "workspace-status"/);
+  assert.equal(JSON.parse(layout).theme.dark, "naps-dusk-gold-test");
+  for (const old of ["naps-test", "code-explorer-test", "usage-test", "naps"]) assert.equal(await exists(join(dir, `layouts/${old}.json`)), false);
+});
+
+test("the layout takes what is installed: built-in Files, released themes, a released usage", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "herdr-home-"));
+  await mkdir(join(dir, "mods/usage"), { recursive: true });
+  await run("--home", dir, "--no-check", "naps");
+  const layout = await readFile(join(dir, LAYOUT), "utf8");
+  assert.match(layout, /"mod": "files"/);
+  assert.match(layout, /"mod": "usage"/);
+  assert.equal(JSON.parse(layout).theme.dark, "naps-dusk-gold-test");
+  const only = await home();
+  await run("--home", only, "--no-check", "usage");
+  const alone = await json(join(only, LAYOUT));
+  assert.equal(alone.theme.dark, "naps-dusk-gold");
+  assert.match(JSON.stringify(alone), /"mod":"usage-test"/);
+});
+
+test("sync removes the old per-package test layouts", async () => {
+  const dir = await home();
+  await mkdir(join(dir, "layouts"), { recursive: true });
+  for (const old of ["naps-test", "code-explorer-test", "usage-test"]) await writeFile(join(dir, `layouts/${old}.json`), "{}");
+  await run("--home", dir, "--no-check", "usage");
+  for (const old of ["naps-test", "code-explorer-test", "usage-test"]) assert.equal(await exists(join(dir, `layouts/${old}.json`)), false);
 });
 
 test("sync code-explorer installs only the mod, its keys and its layout", async () => {
   const dir = await home();
   await run("--home", dir, "--no-check", "code-explorer");
   assert.ok(await exists(join(dir, "mods/code-explorer-test/icons.json")));
-  assert.ok(await exists(join(dir, "layouts/code-explorer-test.json")));
+  assert.match(await readFile(join(dir, LAYOUT), "utf8"), /"mod": "code-explorer-test"/);
   assert.ok((await json(join(dir, "keys.json")))["mod:code-explorer-test"]);
-  assert.equal(await exists(join(dir, "layouts/naps-test.json")), false);
   assert.equal(await exists(join(dir, "themes/naps-dusk-gold-test.json")), false);
 });
 
-test("sync naps installs only the naps layout and themes", async () => {
+test("sync naps installs only the naps themes, and the layout", async () => {
   const dir = await home();
   await run("--home", dir, "--no-check", "naps");
-  assert.ok(await exists(join(dir, "layouts/naps-test.json")));
+  assert.ok(await exists(join(dir, LAYOUT)));
   assert.ok(await exists(join(dir, "themes/naps-test.json")));
-  assert.equal(await exists(join(dir, "layouts/code-explorer-test.json")), false);
+  assert.equal(await exists(join(dir, "mods/usage-test")), false);
   assert.equal(await readFile(join(dir, "mods/code-explorer-test/stale.js"), "utf8"), "old");
   assert.deepEqual(await json(join(dir, "keys.json")), OWN_KEYS);
 });
 
-test("sync --clean naps removes only naps's -test files", async () => {
+test("sync --clean naps removes only naps's -test themes; the layout goes back to the released ones", async () => {
   const dir = await home();
   await run("--home", dir, "--no-check");
   await run("--home", dir, "--clean", "naps");
-  assert.equal(await exists(join(dir, "layouts/naps-test.json")), false);
   assert.equal(await exists(join(dir, "themes/naps-dusk-gold-test.json")), false);
   assert.equal(await readFile(join(dir, "themes/naps.json"), "utf8"), "released");
   assert.ok(await exists(join(dir, "mods/code-explorer-test")));
-  assert.ok(await exists(join(dir, "layouts/code-explorer-test.json")));
+  const layout = await json(join(dir, LAYOUT));
+  assert.equal(layout.theme.dark, "naps-dusk-gold");
+  assert.match(JSON.stringify(layout), /"mod":"code-explorer-test"/);
+});
+
+test("sync usage installs usage-test, its layout and its global key", async () => {
+  const dir = await home();
+  await run("--home", dir, "--no-check", "usage");
+  assert.match(await readFile(join(dir, "mods/usage-test/lib/name.js"), "utf8"), /NAME = "usage-test"/);
+  const layout = await readFile(join(dir, LAYOUT), "utf8");
+  assert.match(layout, /"mod": "usage-test"/);
+  assert.match(layout, /"mod": "workspace-status"/);
+  const keys = await json(join(dir, "keys.json"));
+  assert.equal(keys.global["cmd-alt-u"], "usage-test.toggle");
+  assert.equal(keys.global["cmd-q"], "app.quit");
+  assert.equal(await exists(join(dir, "mods/code-explorer-test/icons.json")), false);
+});
+
+test("sync --clean usage removes usage-test and its key, and nothing else", async () => {
+  const dir = await home();
+  await run("--home", dir, "--no-check");
+  await run("--home", dir, "--clean", "usage");
+  assert.equal(await exists(join(dir, "mods/usage-test")), false);
+  assert.doesNotMatch(await readFile(join(dir, LAYOUT), "utf8"), /usage-test/);
+  const keys = await json(join(dir, "keys.json"));
+  assert.equal("cmd-alt-u" in keys.global, false);
+  assert.ok(keys["mod:code-explorer-test"]);
+  assert.ok(await exists(join(dir, "mods/code-explorer-test")));
+});
+
+test("sync usage never takes ⌘⌥U from a key the person already uses", async () => {
+  const dir = await home();
+  const keys = { ...OWN_KEYS, global: { ...OWN_KEYS.global, "cmd-alt-u": "usage.toggle" } };
+  await writeFile(join(dir, "keys.json"), JSON.stringify(keys, null, 2));
+  const { stdout } = await run("--home", dir, "--no-check", "usage");
+  assert.equal((await json(join(dir, "keys.json"))).global["cmd-alt-u"], "usage.toggle");
+  assert.match(stdout, /cmd-alt-u is taken/);
+  await run("--home", dir, "--clean", "usage");
+  assert.equal((await json(join(dir, "keys.json"))).global["cmd-alt-u"], "usage.toggle");
+});
+
+test("sync code-explorer leaves usage alone", async () => {
+  const dir = await home();
+  await run("--home", dir, "--no-check", "code-explorer");
+  assert.equal(await exists(join(dir, "mods/usage-test")), false);
+  assert.equal("cmd-alt-u" in (await json(join(dir, "keys.json"))).global, false);
 });
 
 test("sync rejects a package it does not know", async () => {
@@ -102,7 +169,7 @@ test("sync adds the copy's keys and keeps the person's own", async () => {
   await run("--home", dir, "--no-check");
   const keys = await json(join(dir, "keys.json"));
   assert.equal(keys["mod:code-explorer-test"]["cmd-alt-c"], "code-explorer-test.copy-path");
-  assert.deepEqual(keys.global, OWN_KEYS.global);
+  assert.deepEqual(keys.global, { ...OWN_KEYS.global, "cmd-alt-u": "usage-test.toggle" });
   assert.equal(keys.terminal["alt-left"], "send:\u001bb");
 });
 
@@ -119,9 +186,8 @@ test("sync --clean removes the -test copy, layouts and keys, and nothing else", 
   await run("--home", dir, "--no-check");
   await run("--home", dir, "--clean");
   assert.equal(await exists(join(dir, "mods/code-explorer-test")), false);
-  assert.equal(await exists(join(dir, "layouts/naps-test.json")), false);
   assert.equal(await exists(join(dir, "themes/naps-test.json")), false);
-  assert.equal(await exists(join(dir, "layouts/code-explorer-test.json")), false);
+  assert.equal(await exists(join(dir, LAYOUT)), false);
   assert.deepEqual(await json(join(dir, "keys.json")), OWN_KEYS);
   assert.ok(await exists(join(dir, "mods/code-explorer/main.js")));
   assert.equal(await readFile(join(dir, "themes/naps.json"), "utf8"), "released");

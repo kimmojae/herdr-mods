@@ -1,7 +1,7 @@
 # herdr-mods
 
 Mods and themes for the [Herdr](https://herdr.dev) desktop app: a Files panel with a code viewer,
-and the Naps themes.
+the Naps themes, and your AI usage limits.
 
 ## Packages
 
@@ -9,6 +9,7 @@ and the Naps themes.
 |---|---|---|
 | **[code-explorer](code-explorer/README.md)** | mod | A Files panel with Symbols icons and git colours, Open in your editor at the change, side-by-side Changes, Markdown and images, and Add File to Agent. |
 | **[naps](naps/README.md)** | layout · theme | The Naps and Naps Dusk Gold themes in Herdr's own window. |
+| **[usage](usage/README.md)** | mod | What's left of every Claude Code account's and Codex's 5-hour and 7-day limits, in the bottom bar; `⌘⌥U` for all of them. |
 
 ## Install
 
@@ -28,7 +29,7 @@ regenerates them; nothing watches in the background.
 npm test          # node --test, no dependencies
 npm run import    # regenerate icons, themes and code colours from Cursor's extensions
 npm run sync      # install a -test working copy into ~/.config/herdr-app and run herdr-app check
-npm run sync -- code-explorer   # just one package (or naps)
+npm run sync -- code-explorer   # just one package (or naps, usage)
 npm run sync -- --clean   # remove the -test copy again (or --clean naps)
 ```
 
