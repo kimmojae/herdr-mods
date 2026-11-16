@@ -1,4 +1,4 @@
-// usage: what's left of each Claude Code account's and Codex's 5-hour and 7-day limits.
+// agent-limits: what's left of each Claude Code account's and Codex's 5-hour and 7-day limits.
 // One class, two roles, each its own copy:
 //   bar    the button in the bottom status row (default)   host/bar.js
 //   panel  the popup it opens                              host/panel.js
@@ -8,7 +8,7 @@ import { props, theme } from "herdr";
 import { barMethods } from "./host/bar.js";
 import { panelMethods } from "./host/panel.js";
 
-class Usage extends View {
+class AgentLimits extends View {
   init(given, cx) {
     this.mode = (props() ?? given ?? {}).mode ?? "bar";
     if (this.mode === "bar") this.initBar(cx);
@@ -26,6 +26,6 @@ class Usage extends View {
   }
 }
 
-Object.assign(Usage.prototype, barMethods, panelMethods);
+Object.assign(AgentLimits.prototype, barMethods, panelMethods);
 
-export default Usage;
+export default AgentLimits;

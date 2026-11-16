@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { offsetsOf, panelAt, GUESS } from "../mods/usage/lib/place.js";
+import { offsetsOf, panelAt, GUESS } from "../mods/agent-limits/lib/place.js";
 
 const view = { width: 1600, height: 1000 };
 

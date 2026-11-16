@@ -64,14 +64,14 @@ export const panelMethods = {
 
   panelView(cx) {
     const t = theme(), now = Date.now(), readings = loadReadings();
-    return v_flex().id("usage-panel").size_full().bg(t.popover).border_1().border_color(t.border).rounded(12)
+    return v_flex().id("agent-limits-panel").size_full().bg(t.popover).border_1().border_color(t.border).rounded(12)
       .font_family(mono()).text_size(12).text_color(t.muted).overflow_hidden()
       .child(v_flex().flex_1().px(16).pt(EDGE)
         .when(readings.length === 0, (el) => el.child(div().h(EMPTY).flex_none().items_center().flex().text_color(t.dim).child("No signed-in Claude or Codex account found.")))
         .children(readings.map((r) => this.account(r, t, now))))
       .child(h_flex().h(FOOT).flex_none().px(16).items_center().justify_between().text_size(11).text_color(t.dim)
         .child(div().child(this.refreshing ? "updating…" : age(readings, now)))
-        .child(div().id("usage-refresh").cursor_pointer().hover((s) => s.text_color(t.foreground))
+        .child(div().id("agent-limits-refresh").cursor_pointer().hover((s) => s.text_color(t.foreground))
           .on_click((_e, cx) => { this.refreshPanel(cx); cx.notify(); }).child("↻ refresh")));
   },
 };

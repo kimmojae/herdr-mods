@@ -113,14 +113,14 @@ export const barMethods = {
     const open = Boolean(shared(key("open")));
     return h_flex().id(NAME).size_full().items_center().justify_end().px(SIDE).bg(t.chrome)
       .border_t(1).border_color(t.border)
-      .child(h_flex().id("usage-button").h(24).px(8).gap(14).items_center().rounded(6).cursor_pointer()
-        .accessibility_label("Usage limits").tooltip("Usage limits (⌘⌥U)")
+      .child(h_flex().id("agent-limits-button").h(24).px(8).gap(14).items_center().rounded(6).cursor_pointer()
+        .accessibility_label("Agent limits").tooltip("Agent limits (⌘⌥U)")
         .when(open, (el) => el.bg(t.selected)).when(!open, (el) => el.hover((s) => s.bg(t.hover)))
         .on_size_change((size) => this.fitBlock(size.width))
         .on_mouse_move((e) => this.learnPlace(e))
         .on_mouse_down("left", (e) => this.learnPlace(e))
         .on_click((_e, cx) => { this.toggle(); cx.notify(); })
-        .when(readings.length === 0, (el) => el.child(div().text_size(11).text_color(t.dim).child(this.polling ? "Usage…" : "No accounts")))
+        .when(readings.length === 0, (el) => el.child(div().text_size(11).text_color(t.dim).child(this.polling ? "Limits…" : "No accounts")))
         .children(readings.map((r) => this.item(r, t, nowS))));
   },
 };

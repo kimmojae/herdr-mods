@@ -3,13 +3,13 @@
 // people get from GitHub, which it never touches:
 //   code-explorer  the mod as code-explorer-test (with its keys)
 //   naps           the themes as <name>-test
-//   usage          the mod as usage-test (with its ⌘⌥U key)
+//   agent-limits   the mod as agent-limits-test (with its ⌘⌥U key)
 // All when none is named. Then one layout, herdr-mods-test, puts together whatever is installed:
-// naps, in its -test themes if they're there, with code-explorer-test in Files and usage-test
-// (or a released usage) beside workspace-status. Copies, not links: Herdr won't load icons
+// naps, in its -test themes if they're there, with code-explorer-test in Files and agent-limits-test
+// (or a released agent-limits) beside workspace-status. Copies, not links: Herdr won't load icons
 // through a link. Runs `herdr-app check` on each mod's copy. --clean removes the named
 // packages' copies again, and the layout follows.
-// Usage: node scripts/sync.mjs [--home <dir>] [--no-check] [--dry-run] [--clean] [code-explorer] [naps] [usage]
+// Usage: node scripts/sync.mjs [--home <dir>] [--no-check] [--dry-run] [--clean] [code-explorer] [naps] [agent-limits]
 import { readdir, readFile, writeFile, mkdir, cp, rm, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, relative } from "node:path";
@@ -24,17 +24,17 @@ const copyOf = (mod) => `${mod}-test`;
 function withStatusRow(node, mod) {
   if (node?.id === "status") return { id: "status-row", type: "row", size: { px: 28 }, resizable: false, children: [
     { id: "status", type: "block", size: { weight: 1 }, content: { mod: "workspace-status" } },
-    { id: "usage", type: "block", size: { px: 160 }, content: { mod } }] };
+    { id: "agent-limits", type: "block", size: { px: 160 }, content: { mod } }] };
   return node?.children ? { ...node, children: node.children.map((c) => withStatusRow(c, mod)) } : node;
 }
 
 // The mod packages, and whether a copy's global keys come along (code-explorer's stay with the
 // released mod).
-const MODS = { "code-explorer": { globals: false }, usage: { globals: true } };
+const MODS = { "code-explorer": { globals: false }, "agent-limits": { globals: true } };
 const LAYOUT = "herdr-mods-test";
 // The per-package test layouts this script made before there was one.
 const OLD_LAYOUTS = ["code-explorer-test", "usage-test", "naps-test"];
-const PACKAGES = ["code-explorer", "naps", "usage"];
+const PACKAGES = ["code-explorer", "naps", "agent-limits"];
 const test = (n) => n.replace(/\.json$/, "-test.json");
 // Herdr writes these into a mod folder itself; the cache is the mod's runtime state.
 const KEEP = (rel) => /^\.?cache(\/|$)/.test(rel) || rel.endsWith(".d.ts") || rel === "jsconfig.json";
@@ -100,7 +100,7 @@ async function syncNaps(home, dry) {
 }
 
 // One layout with every working copy that is installed: naps, its Naps themes as their -test
-// copies, code-explorer-test in Files, usage-test (else a released usage) in the status row.
+// copies, code-explorer-test in Files, agent-limits-test (else a released agent-limits) in the status row.
 // With no copy and no -test theme left, there is nothing to try out: the layout goes.
 async function testLayout(home, dry) {
   const file = join(home, "layouts", `${LAYOUT}.json`);
@@ -111,18 +111,18 @@ async function testLayout(home, dry) {
   }
   const has = (rel) => exists(join(home, rel));
   const files = await has(`mods/${copyOf("code-explorer")}`);
-  const usage = (await has(`mods/${copyOf("usage")}`)) ? copyOf("usage") : (await has("mods/usage")) ? "usage" : null;
+  const limits = (await has(`mods/${copyOf("agent-limits")}`)) ? copyOf("agent-limits") : (await has("mods/agent-limits")) ? "agent-limits" : null;
   const layout = JSON.parse(await readFile(join(ROOT, "naps/layouts/naps.json"), "utf8"));
   let themed = false;
   for (const mode of ["light", "dark"]) {
     const name = layout.theme?.[mode];
     if (name && (await has(`themes/${name}-test.json`))) { layout.theme[mode] = `${name}-test`; themed = true; }
   }
-  if (!files && usage !== copyOf("usage") && !themed) {
+  if (!files && limits !== copyOf("agent-limits") && !themed) {
     if (await exists(file)) { if (!dry) await rm(file); console.log(`removed layouts/${LAYOUT}.json`); }
     return;
   }
-  let text = JSON.stringify(usage ? withStatusRow(layout, usage) : layout, null, 2) + "\n";
+  let text = JSON.stringify(limits ? withStatusRow(layout, limits) : layout, null, 2) + "\n";
   if (files) text = text.replace(/"mod": "files"/g, `"mod": "${copyOf("code-explorer")}"`);
   if (!dry) {
     await mkdir(join(home, "layouts"), { recursive: true });
@@ -131,7 +131,7 @@ async function testLayout(home, dry) {
   console.log(`layout: ${LAYOUT}.json`);
 }
 
-// The copy's own keys (mod:<copy>, and for usage its global ⌘⌥U) in the person's keys.json.
+// The copy's own keys (mod:<copy>, and for agent-limits its global ⌘⌥U) in the person's keys.json.
 // `add` false takes them out again; a global key is removed only while it still points at the copy.
 async function devKeys(home, dry, add, MOD) {
   const COPY = copyOf(MOD);

@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { parseClaudeUsage } from "../mods/usage/lib/claude.js";
-import { parseCodexLimits } from "../mods/usage/lib/codex.js";
+import { parseClaudeUsage } from "../mods/agent-limits/lib/claude.js";
+import { parseCodexLimits } from "../mods/agent-limits/lib/codex.js";
 
 const path = (rel) => fileURLToPath(new URL(rel, import.meta.url));
-const helper = (name) => path(`../mods/usage/helpers/${name}`);
+const helper = (name) => path(`../mods/agent-limits/helpers/${name}`);
 
 // Runs a helper with env overrides; resolves { code, stdout } whatever the exit status.
 // A missing helper fails here, so its 127 can't pass for "CLI not found".

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseCodexLimits } from "../mods/usage/lib/codex.js";
+import { parseCodexLimits } from "../mods/agent-limits/lib/codex.js";
 
 const reply = (rateLimits) => JSON.stringify({ id: 2, result: { rateLimits } });
 

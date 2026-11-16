@@ -1,4 +1,4 @@
-# Usage
+# agent-limits
 
 What's left of your Claude Code and Codex limits, in Herdr's bottom bar. Every Claude
 account you use (one per `CLAUDE_CONFIG_DIR`) and Codex, side by side: per account its logo
@@ -7,24 +7,24 @@ account at once: what's left of each window and when it resets.
 
 Bars and numbers show what's **left**. Under 30% left, they turn orange.
 
-![usage](preview.png)
+![agent-limits](preview.png)
 
 ## Install
 
-Copy `mods/usage/` into `~/.config/herdr-app/mods/`. Then, in a layout of yours (a clone of
+Copy `mods/agent-limits/` into `~/.config/herdr-app/mods/`. Then, in a layout of yours (a clone of
 `main`: `herdr-app do layout.clone '{"name":"main","as":"my-main"}'`), replace the `status`
 block with this row:
 
 ```json
 { "id": "status-row", "type": "row", "size": { "px": 28 }, "resizable": false, "children": [
   { "id": "status", "type": "block", "size": { "weight": 1 }, "content": { "mod": "workspace-status" } },
-  { "id": "usage", "type": "block", "size": { "px": 160 }, "content": { "mod": "usage" } } ] }
+  { "id": "agent-limits", "type": "block", "size": { "px": 160 }, "content": { "mod": "agent-limits" } } ] }
 ```
 
 And add the key to `~/.config/herdr-app/keys.json`:
 
 ```json
-"global": { "cmd-alt-u": "usage.toggle" }
+"global": { "cmd-alt-u": "agent-limits.toggle" }
 ```
 
 ## Which accounts

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { parseClaudeUsage } from "../mods/usage/lib/claude.js";
+import { parseClaudeUsage } from "../mods/agent-limits/lib/claude.js";
 
 const fixture = (name) => readFile(new URL(`fixtures/${name}`, import.meta.url), "utf8");
 const reply = (response) => JSON.stringify({ type: "control_response", response });

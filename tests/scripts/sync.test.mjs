@@ -56,32 +56,32 @@ test("sync builds one herdr-mods-test layout with every working copy in it", asy
   const layout = await readFile(join(dir, LAYOUT), "utf8");
   assert.match(layout, /"mod": "code-explorer-test"/);
   assert.doesNotMatch(layout, /"mod": "files"/);
-  assert.match(layout, /"mod": "usage-test"/);
+  assert.match(layout, /"mod": "agent-limits-test"/);
   assert.match(layout, /"mod": "workspace-status"/);
   assert.equal(JSON.parse(layout).theme.dark, "naps-dusk-gold-test");
   for (const old of ["naps-test", "code-explorer-test", "usage-test", "naps"]) assert.equal(await exists(join(dir, `layouts/${old}.json`)), false);
 });
 
-test("the layout takes what is installed: built-in Files, released themes, a released usage", async () => {
+test("the layout takes what is installed: built-in Files, released themes, a released agent-limits", async () => {
   const dir = await mkdtemp(join(tmpdir(), "herdr-home-"));
-  await mkdir(join(dir, "mods/usage"), { recursive: true });
+  await mkdir(join(dir, "mods/agent-limits"), { recursive: true });
   await run("--home", dir, "--no-check", "naps");
   const layout = await readFile(join(dir, LAYOUT), "utf8");
   assert.match(layout, /"mod": "files"/);
-  assert.match(layout, /"mod": "usage"/);
+  assert.match(layout, /"mod": "agent-limits"/);
   assert.equal(JSON.parse(layout).theme.dark, "naps-dusk-gold-test");
   const only = await home();
-  await run("--home", only, "--no-check", "usage");
+  await run("--home", only, "--no-check", "agent-limits");
   const alone = await json(join(only, LAYOUT));
   assert.equal(alone.theme.dark, "naps-dusk-gold");
-  assert.match(JSON.stringify(alone), /"mod":"usage-test"/);
+  assert.match(JSON.stringify(alone), /"mod":"agent-limits-test"/);
 });
 
 test("sync removes the old per-package test layouts", async () => {
   const dir = await home();
   await mkdir(join(dir, "layouts"), { recursive: true });
   for (const old of ["naps-test", "code-explorer-test", "usage-test"]) await writeFile(join(dir, `layouts/${old}.json`), "{}");
-  await run("--home", dir, "--no-check", "usage");
+  await run("--home", dir, "--no-check", "agent-limits");
   for (const old of ["naps-test", "code-explorer-test", "usage-test"]) assert.equal(await exists(join(dir, `layouts/${old}.json`)), false);
 });
 
@@ -99,7 +99,7 @@ test("sync naps installs only the naps themes, and the layout", async () => {
   await run("--home", dir, "--no-check", "naps");
   assert.ok(await exists(join(dir, LAYOUT)));
   assert.ok(await exists(join(dir, "themes/naps-test.json")));
-  assert.equal(await exists(join(dir, "mods/usage-test")), false);
+  assert.equal(await exists(join(dir, "mods/agent-limits-test")), false);
   assert.equal(await readFile(join(dir, "mods/code-explorer-test/stale.js"), "utf8"), "old");
   assert.deepEqual(await json(join(dir, "keys.json")), OWN_KEYS);
 });
@@ -116,46 +116,46 @@ test("sync --clean naps removes only naps's -test themes; the layout goes back t
   assert.match(JSON.stringify(layout), /"mod":"code-explorer-test"/);
 });
 
-test("sync usage installs usage-test, its layout and its global key", async () => {
+test("sync agent-limits installs agent-limits-test, its layout and its global key", async () => {
   const dir = await home();
-  await run("--home", dir, "--no-check", "usage");
-  assert.match(await readFile(join(dir, "mods/usage-test/lib/name.js"), "utf8"), /NAME = "usage-test"/);
+  await run("--home", dir, "--no-check", "agent-limits");
+  assert.match(await readFile(join(dir, "mods/agent-limits-test/lib/name.js"), "utf8"), /NAME = "agent-limits-test"/);
   const layout = await readFile(join(dir, LAYOUT), "utf8");
-  assert.match(layout, /"mod": "usage-test"/);
+  assert.match(layout, /"mod": "agent-limits-test"/);
   assert.match(layout, /"mod": "workspace-status"/);
   const keys = await json(join(dir, "keys.json"));
-  assert.equal(keys.global["cmd-alt-u"], "usage-test.toggle");
+  assert.equal(keys.global["cmd-alt-u"], "agent-limits-test.toggle");
   assert.equal(keys.global["cmd-q"], "app.quit");
   assert.equal(await exists(join(dir, "mods/code-explorer-test/icons.json")), false);
 });
 
-test("sync --clean usage removes usage-test and its key, and nothing else", async () => {
+test("sync --clean agent-limits removes agent-limits-test and its key, and nothing else", async () => {
   const dir = await home();
   await run("--home", dir, "--no-check");
-  await run("--home", dir, "--clean", "usage");
-  assert.equal(await exists(join(dir, "mods/usage-test")), false);
-  assert.doesNotMatch(await readFile(join(dir, LAYOUT), "utf8"), /usage-test/);
+  await run("--home", dir, "--clean", "agent-limits");
+  assert.equal(await exists(join(dir, "mods/agent-limits-test")), false);
+  assert.doesNotMatch(await readFile(join(dir, LAYOUT), "utf8"), /agent-limits-test/);
   const keys = await json(join(dir, "keys.json"));
   assert.equal("cmd-alt-u" in keys.global, false);
   assert.ok(keys["mod:code-explorer-test"]);
   assert.ok(await exists(join(dir, "mods/code-explorer-test")));
 });
 
-test("sync usage never takes ⌘⌥U from a key the person already uses", async () => {
+test("sync agent-limits never takes ⌘⌥U from a key the person already uses", async () => {
   const dir = await home();
-  const keys = { ...OWN_KEYS, global: { ...OWN_KEYS.global, "cmd-alt-u": "usage.toggle" } };
+  const keys = { ...OWN_KEYS, global: { ...OWN_KEYS.global, "cmd-alt-u": "agent-limits.toggle" } };
   await writeFile(join(dir, "keys.json"), JSON.stringify(keys, null, 2));
-  const { stdout } = await run("--home", dir, "--no-check", "usage");
-  assert.equal((await json(join(dir, "keys.json"))).global["cmd-alt-u"], "usage.toggle");
+  const { stdout } = await run("--home", dir, "--no-check", "agent-limits");
+  assert.equal((await json(join(dir, "keys.json"))).global["cmd-alt-u"], "agent-limits.toggle");
   assert.match(stdout, /cmd-alt-u is taken/);
-  await run("--home", dir, "--clean", "usage");
-  assert.equal((await json(join(dir, "keys.json"))).global["cmd-alt-u"], "usage.toggle");
+  await run("--home", dir, "--clean", "agent-limits");
+  assert.equal((await json(join(dir, "keys.json"))).global["cmd-alt-u"], "agent-limits.toggle");
 });
 
-test("sync code-explorer leaves usage alone", async () => {
+test("sync code-explorer leaves agent-limits alone", async () => {
   const dir = await home();
   await run("--home", dir, "--no-check", "code-explorer");
-  assert.equal(await exists(join(dir, "mods/usage-test")), false);
+  assert.equal(await exists(join(dir, "mods/agent-limits-test")), false);
   assert.equal("cmd-alt-u" in (await json(join(dir, "keys.json"))).global, false);
 });
 
@@ -169,7 +169,7 @@ test("sync adds the copy's keys and keeps the person's own", async () => {
   await run("--home", dir, "--no-check");
   const keys = await json(join(dir, "keys.json"));
   assert.equal(keys["mod:code-explorer-test"]["cmd-alt-c"], "code-explorer-test.copy-path");
-  assert.deepEqual(keys.global, { ...OWN_KEYS.global, "cmd-alt-u": "usage-test.toggle" });
+  assert.deepEqual(keys.global, { ...OWN_KEYS.global, "cmd-alt-u": "agent-limits-test.toggle" });
   assert.equal(keys.terminal["alt-left"], "send:\u001bb");
 });
 
