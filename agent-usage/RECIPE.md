@@ -1,18 +1,18 @@
-# agent-limits
+# agent-usage
 
 What's left of each Claude Code account's and Codex's 5-hour and 7-day limits: one button in
 the bottom status row, one panel. This is the brief; the files beside it are one build.
-![agent-limits](preview.png)
+![agent-usage](preview.png)
 
 ## What you see
 
-### The button (`mods/agent-limits`, default mode)
+### The button (`mods/agent-usage`, default mode)
 
 - A block beside `workspace-status` in the 28px status row, `chrome` background, a 1px
   `border` line on top like the status beside it. The block sizes itself to the button
   (`layout.resize` to the button's width plus 8px a side), so `workspace-status` keeps the rest
   of the row. One button for everything: 24px high, 8px side padding, 6px corners,
-  `hover` on hover, `selected` while the panel is open. Tooltip "Agent limits (⌘⌥U)".
+  `hover` on hover, `selected` while the panel is open. Tooltip "Agent usage (⌘⌥U)".
 - Per account, 14px apart, all alike: the logo (13px; each provider's mark in its own colours), then two lines, `5h` over `7d` (10px terminal font, `dim`, 11px line
   height), each with a 30×3px bar on a `border` track.
 - Bars show what's left. Fill `muted`; `ansi3` under 30% left.
@@ -39,7 +39,7 @@ the bottom status row, one panel. This is the brief; the files beside it are one
 - Footer, 34px: `updated just now` / `updated N min ago` left, `↻ refresh` right.
 - Esc or a click outside closes it; so does the button or `⌘⌥U` again. It opens above the
   button, right edges lined up, 6px apart. A mod learns where its block is only from a pointer
-  event, so the button's place is kept (shared `agent-limits:place`) as its distance from the window's
+  event, so the button's place is kept (shared `agent-usage:place`) as its distance from the window's
   bottom-right corner, which holds when the window is resized and after a restart; before the
   pointer has ever crossed it, it is taken to be the right end of a 28px status row.
 
@@ -54,9 +54,9 @@ the bottom status row, one panel. This is the brief; the files beside it are one
   windows by length (300 and 10080 minutes).
 - Accounts: `~/.claude.json`, plus each `CLAUDE_CONFIG_DIR` seen in `ps -axwwE -o command=`
   (remembered), plus Codex's `~/.codex/auth.json`. One per `accountUuid`.
-- Labels: a name set in shared `agent-limits:names` (`{ id: name }`) wins; Team/Enterprise the
+- Labels: a name set in shared `agent-usage:names` (`{ id: name }`) wins; Team/Enterprise the
   organization, else the email; never "…'s Organization".
-- Readings, folders and the open panel's id live in shared state (`agent-limits:*`): the button and
+- Readings, folders and the open panel's id live in shared state (`agent-usage:*`): the button and
   the panel are separate copies, and each copy has its own `localStorage`.
 - The button asks on start and every 5 minutes; the panel on open and on ↻. A failed ask
   keeps the last good limits and shows the error. A window past its reset shows `—`.
@@ -64,6 +64,6 @@ the bottom status row, one panel. This is the brief; the files beside it are one
 ## Files
 
 - `lib/` (pure, `node --test`): `format.js`, `claude.js`, `codex.js`, `accounts.js`,
-  `plan.js`, `layout.js`, `name.js`. Tests in `agent-limits/tests/`, fake CLIs in `agent-limits/tests/fake/`.
+  `plan.js`, `layout.js`, `name.js`. Tests in `agent-usage/tests/`, fake CLIs in `agent-usage/tests/fake/`.
 - `host/`: `poll.js` (find and ask), `bar.js`, `panel.js`, `look.js` (logo, bar, badge).
 - `helpers/`: the two POSIX scripts. `icons/`: the two marks, from LobeHub Icons (MIT; see README).

@@ -9,7 +9,7 @@ the Naps themes, and your AI usage limits.
 |---|---|---|
 | **[code-explorer](code-explorer/README.md)** | mod | A Files panel with Symbols icons and git colours, Open in your editor at the change, side-by-side Changes, Markdown and images, and Add File to Agent. |
 | **[naps](naps/README.md)** | layout · theme | The Naps and Naps Dusk Gold themes in Herdr's own window. |
-| **[agent-limits](agent-limits/README.md)** | mod | What's left of every Claude Code account's and Codex's 5-hour and 7-day limits, in the bottom bar; `⌘⌥U` for all of them. |
+| **[agent-usage](agent-usage/README.md)** | mod | What's left of every Claude Code account's and Codex's 5-hour and 7-day limits, in the bottom bar; `⌘⌥U` for all of them. |
 
 ## Install
 
@@ -29,7 +29,7 @@ regenerates them; nothing watches in the background.
 npm test          # node --test, no dependencies
 npm run import    # regenerate icons, themes and code colours from Cursor's extensions
 npm run sync      # install a -test working copy into ~/.config/herdr-app and run herdr-app check
-npm run sync -- code-explorer   # just one package (or naps, agent-limits)
+npm run sync -- code-explorer   # just one package (or naps, agent-usage)
 npm run sync -- --clean   # remove the -test copy again (or --clean naps)
 ```
 

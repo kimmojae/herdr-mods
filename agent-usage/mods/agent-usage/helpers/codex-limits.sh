@@ -18,7 +18,7 @@ mkfifo "$dir/in" || { rm -rf "$dir"; exit 1; }
 "$CODEX" app-server <"$dir/in" >"$out" 2>/dev/null &
 pid=$!
 exec 3>"$dir/in"
-printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"clientInfo":{"name":"herdr-agent-limits","version":"1.0"}}}' >&3
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"clientInfo":{"name":"herdr-agent-usage","version":"1.0"}}}' >&3
 printf '%s\n' '{"jsonrpc":"2.0","method":"initialized"}' >&3
 printf '%s\n' '{"jsonrpc":"2.0","id":2,"method":"account/rateLimits/read","params":{}}' >&3
 

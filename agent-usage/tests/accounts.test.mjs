@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { configDirsFromPs, claudeAccount, codexAccount, uniqueAccounts } from "../mods/agent-limits/lib/accounts.js";
+import { configDirsFromPs, claudeAccount, codexAccount, uniqueAccounts } from "../mods/agent-usage/lib/accounts.js";
 
 const team = { oauthAccount: { accountUuid: "u1", organizationType: "claude_team", organizationName: "acme-cloud", emailAddress: "a@acme.dev" } };
 const max = { oauthAccount: { accountUuid: "u2", organizationType: "claude_max", organizationName: "kim@studio.dev's Organization", emailAddress: "kim@studio.dev" } };

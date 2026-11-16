@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { left, isLow, resetText, cutMiddle, fillWidth, ageText, panelHeight, monoFont } from "../mods/agent-limits/lib/format.js";
+import { left, isLow, resetText, cutMiddle, fillWidth, ageText, panelHeight, monoFont } from "../mods/agent-usage/lib/format.js";
 
 const now = new Date(2026, 10, 13, 18, 6, 0);
 const nowS = now / 1000;
