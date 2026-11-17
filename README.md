@@ -7,7 +7,7 @@ the Naps themes, and your AI usage limits.
 
 | Package | Kind | What you get |
 |---|---|---|
-| **[code-explorer](code-explorer/README.md)** | mod | A Files panel with Symbols icons and git colours, Open in your editor at the change, side-by-side Changes, Markdown and images, and Add File to Agent. |
+| **[code-explorer](code-explorer/README.md)** | mod | A Files panel with Symbols icons and git colours, Open in your editor at the change, side-by-side Changes, Find like Cursor's, Markdown and images, and Add File to Agent. |
 | **[naps](naps/README.md)** | layout · theme | The Naps and Naps Dusk Gold themes in Herdr's own window. |
 | **[agent-usage](agent-usage/README.md)** | mod | What's left of every Claude Code account's and Codex's 5-hour and 7-day limits, in the bottom bar; `⌘⌥U` for all of them. |
 

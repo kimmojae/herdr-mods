@@ -21,6 +21,8 @@ changed.
 - **Shows what changed.** Code in your theme's colours with change bars; click one to see the
   lines it replaced. **Changes** puts HEAD and your file side by side with the changed words
   marked, and folds into one column when the pane is narrow. The header counts `+38 −1`.
+- **Find, like Cursor.** ⌘F in Code or Changes: match case, whole word and regular expression,
+  every match marked, Enter to step through them.
 - **Markdown and images.** Markdown rendered with its local images, images to fit or at 100%.
   Every view follows the file as it changes. (HTML: open it in your browser; here it's text only.)
 - **Hands files to agents.** Right-click › Add File to Agent types `@path ` into a running agent
@@ -67,6 +69,8 @@ By hand, in `~/.config/herdr-app`: point your layout's Files block back at `file
 | ↑ ↓ ← → · Enter · Space | Files | move, open and close folders · open pinned · preview |
 | ⌥⌘C · ⌥⇧⌘C | Files | copy path · copy relative path |
 | ⌥⌘R · ⌃↩ | Files | reveal in Finder · open to the side |
+| ⌘F | viewer | find in Code and Changes |
+| Enter · ⇧Enter (⌘G · ⇧⌘G) · Esc | find | next · previous · close |
 
 ## Needs
 
@@ -84,7 +88,8 @@ editor's own command-line tool (`cursor`, `code`, `idea`…). No network.
 
 500 entries a folder and 5,000 rows; files over 1 MB or 400,000 characters are cut or not shown;
 images over 20 MB aren't previewed. HTML shows without CSS or scripts: open it in your browser
-for the page. Markdown follows the Herdr theme's colours (switch to light to read on white).
+for the page. Find works in Code and Changes, not in the Markdown and HTML previews (Cursor's
+don't either), and stops counting at 9,999 matches. Markdown follows the Herdr theme's colours (switch to light to read on white).
 
 ## Credits
 
