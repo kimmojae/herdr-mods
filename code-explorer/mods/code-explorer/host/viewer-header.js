@@ -1,6 +1,6 @@
 // The viewer's header: file icon, name, folder, lines added and removed, then by kind Keep Open,
 // Code / Changes (Preview / Code / Changes for Markdown and HTML), Fit / 100%, the editor's and
-// (HTML) the browser's icon buttons, and ⋯. Methods of the one View class (main.js).
+// (HTML) the browser's icon buttons, Find where it works, and ⋯. Methods of the one View class (main.js).
 import { div, image, svg } from "gpui-kit";
 import { h_flex } from "gpui-base";
 import { pickGit } from "../lib/palette.js";
@@ -81,6 +81,11 @@ export const viewerHeaderMethods = {
     if (this.kind === "html") bar.child(this.segmented("v-html", withChanges([["preview", "Preview"], ["code", "Code"]]), sideBySide ? "changes" : this.htmlView(), pick("html"), t));
     if (this.kind === "image") bar.child(this.segmented("v-fit", [["fit", "Fit"], ["full", "100%"]], this.fit ? "fit" : "full", (v) => { this.fit = v === "fit"; }, t));
     if (file && !file.on) bar.child(this.openButtons(file, t));
+    if (this.findable()) bar.child(div().id("v-find-open").size(CTRL).flex_none().flex().items_center().justify_center().rounded(7).cursor_pointer()
+      .tooltip("Find (⌘F)").text_color(this.finding ? t.foreground : t.dim).when(this.finding, (el) => el.bg(t.selected))
+      .hover((s) => s.bg(t.hover).text_color(t.foreground))
+      .on_click((_e, cx) => { cx.stop_propagation(); this.finding ? this.closeFind(cx) : this.openFind(cx); })
+      .child(svg(`${MOD}/ui/search.svg`).size(14)));
     bar.child(div().id("v-more").size(CTRL).flex_none().flex().items_center().justify_center().rounded(7).cursor_pointer().text_color(t.dim)
       .hover((s) => s.bg(t.hover).text_color(t.foreground))
       .on_click((_e, cx) => { cx.stop_propagation(); if (file) openMenu({ ...file, dir: false, treePath: null, viewer: this.viewerId }, activeSpace()); })

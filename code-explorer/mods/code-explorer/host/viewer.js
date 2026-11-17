@@ -2,7 +2,8 @@
 // copy keeps its registry entry (lib/registry.js) up to date from render, so a change shows at once.
 // Code (highlighted, with changes against HEAD), Markdown (rendered or code), images and HTML
 // (its text and structure via Herdr's TextView) — pictures are drawn through copies in
-// the mod's hidden .cache/ (writing elsewhere under mods/ would reload the mod).
+// the mod's hidden .cache/ (writing elsewhere under mods/ would reload the mod). ⌘F finds in
+// Code and Changes (viewer-find.js).
 import { div } from "gpui-kit";
 import { v_flex } from "gpui-base";
 import { props, panes, spaces, focused, shared, setShared, run, theme, readTextFile, watchFolder, exec, appHome, nextCommand } from "herdr";
@@ -126,14 +127,22 @@ export const viewerMethods = {
     this.palettes = [];
     this.openHunks = new Set();
     this.fit = true;
+    this.initFind(cx);
     cx.spawn(async (cx) => {
       this.palettes = await loadPalettes();
       try { this.iconMap = JSON.parse(await readTextFile(`${appHome()}/${MOD}/icons.json`)); } catch { this.iconMap = null; }
       cx.notify();
     });
     cx.timer.every(5000, (cx) => { if (this.shown) { this.readHunks(this.shown, cx); if (this.shown.on) this.reload(cx); } });
-    // ⌘⌥L reaches the copies on screen; a viewer may be the only one (Files closed).
-    cx.spawn(async () => { for (;;) { if (String(await nextCommand()).split(".").pop() === "toggle-appearance") toggleAppearance(); } });
+    // ⌘⌥L reaches the copies on screen; a viewer may be the only one (Files closed). "focus":
+    // pane.go gave this viewer the keyboard, for ⌘F.
+    cx.spawn(async () => {
+      for (;;) {
+        const command = String(await nextCommand()).split(".").pop();
+        if (command === "toggle-appearance") toggleAppearance();
+        else if (command === "focus") this.finding ? this.findInput.focus() : this.viewerFocus.focus();
+      }
+    });
   },
 
   async closeViewer() {
@@ -291,9 +300,12 @@ export const viewerMethods = {
       : this.kind === "markdown" && this.markdownView() === "preview" ? this.markdownPreview(t)
       : this.kind === "html" && this.htmlView() === "preview" ? this.htmlPreview(t)
       : this.codeView(t);
+    const finding = this.finding && this.findable();
     return v_flex().id("code-explorer-viewer").size_full()
+      .track_focus(this.viewerFocus).on_key_down((e, cx) => this.findKey(e, cx))
+      .on_mouse_down("left", () => this.viewerFocus.focus())
       .on_size_change((size, cx) => { if (size.width !== this.paneWidth) { this.paneWidth = size.width; cx.notify(); } }).min_h(0).min_w(0).overflow_hidden().bg(t.background).text_color(t.foreground).text_size(13)
       .child(this.viewerHeader(entry, t))
-      .child(body);
+      .child(v_flex().flex_1().min_h(0).min_w(0).relative().child(body).when(finding, (el) => el.child(this.findBar(t))));
   },
 };

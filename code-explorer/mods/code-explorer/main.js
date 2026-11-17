@@ -1,6 +1,6 @@
 // code-explorer: a Cursor-style Files panel for Herdr. One class, three roles, each its own copy:
 //   sidebar  the tree (default)          host/tree.js
-//   viewer   a file in a tab or a split  host/viewer.js (+ viewer-header.js, viewer-views.js)
+//   viewer   a file in a tab or a split  host/viewer.js (+ viewer-header.js, viewer-views.js, viewer-find.js)
 //   menu     a right-click popup         host/menu-view.js
 // lib/ holds the logic that does not touch Herdr; tests run it under plain Node.
 import { View, div } from "gpui-kit";
@@ -10,6 +10,7 @@ import { menuMethods } from "./host/menu-view.js";
 import { viewerMethods } from "./host/viewer.js";
 import { viewerHeaderMethods } from "./host/viewer-header.js";
 import { viewerViewMethods } from "./host/viewer-views.js";
+import { viewerFindMethods } from "./host/viewer-find.js";
 
 class CodeExplorer extends View {
   init(given, cx) {
@@ -32,6 +33,6 @@ class CodeExplorer extends View {
   }
 }
 
-Object.assign(CodeExplorer.prototype, treeMethods, menuMethods, viewerMethods, viewerHeaderMethods, viewerViewMethods);
+Object.assign(CodeExplorer.prototype, treeMethods, menuMethods, viewerMethods, viewerHeaderMethods, viewerViewMethods, viewerFindMethods);
 
 export default CodeExplorer;

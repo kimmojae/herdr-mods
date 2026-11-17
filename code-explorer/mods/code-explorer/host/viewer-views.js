@@ -23,25 +23,29 @@ export const viewerViewMethods = {
     const rowH = Math.round(size * 1.6);
     const open = inline ? new Set(this.hunks.filter((h) => h.old.length).map(hunkKey)) : this.openHunks;
     const rows = buildRows(this.lines ?? [], this.hunks, open);
+    const found = this.findIn("code", rows.map((r) => (r.type === "removed" ? null : r.text)));
+    this.revealFound((i) => i);
     const sizes = rows.some((r) => r.type === "removed") ? rows.map((r) => (r.type === "removed" ? 8 : rowH)) : rowH;
     const widest = (this.lines ?? []).reduce((m, l) => Math.max(m, l.length), 0);
     const id = `v-lines-${this.viewerId}`;
     const mark = (h) => (!h ? null : h.kind === "added" ? t.ansi2 : h.kind === "removed" ? t.ansi1 : open.has(hunkKey(h)) ? t.ansi2 : t.ansi3);
-    const row = (r) => {
+    const row = (r, i) => {
       if (r.type === "removed") return h_flex().id(`v-${r.key}`).h(8).w_full().items_center().cursor_pointer().child(div().h(2).w_full().bg(t.ansi1));
       const old = r.type === "old", color = old ? t.ansi1 : mark(r.hunk);
-      const runs = markRuns(old ? [["old", r.text]] : this.tokens?.[r.number - 1] ?? [], null);
+      const runs = this.withFound(markRuns(old ? [["old", r.text]] : this.tokens?.[r.number - 1] ?? [], null), found.get(i));
       return h_flex().id(`v-${r.key}`).h(rowH).w_full().items_center()
         .when(Boolean(color), (el) => el.bg(`${color.slice(0, 7)}26`))
         .child(div().w(3).h_full().flex_none().when(Boolean(color), (el) => el.bg(color)))
         .child(div().w(size * 3.5).pr(size).flex_none().text_right().text_color(t.dim).child(String(r.number)))
-        .child(h_flex().flex_1().min_w(0).whitespace_nowrap().children(runs.map(([kind, text]) => {
+        .child(h_flex().flex_1().min_w(0).whitespace_nowrap().children(runs.map(([kind, text, , find]) => {
           const st = palette[kind];
           return div().flex_none().whitespace_nowrap().text_color(kind === "old" ? t.ansi1 : st?.color ?? t.foreground)
+            .when(Boolean(find), (el) => el.bg(this.foundBg(find, t)).rounded(2))
             .when(Boolean(st?.italic), (el) => el.italic()).when(Boolean(st?.bold), (el) => el.font_weight(700)).child(text);
         })));
     };
-    const list = v_virtual_list(id, rows.length, sizes, (i) => rows[i].key, (range) => rows.slice(range.start, range.end).map(row))
+    const list = v_virtual_list(id, rows.length, sizes, (i) => rows[i].key, (range) => rows.slice(range.start, range.end).map((r, k) => row(r, range.start + k)))
+      .track_scroll(this.listScroll)
       .on_item_click((key, cx) => {
         const r = rows.find((x) => x.key === key);
         if (!inline && r?.hunk?.old.length) { const k = hunkKey(r.hunk); this.openHunks.delete(k) || this.openHunks.add(k); cx.notify(); }
@@ -69,31 +73,36 @@ export const viewerViewMethods = {
       }
     }
     const rows = this.sideRows;
+    // Two items a row, HEAD then the file, so matches run left to right, top to bottom.
+    const found = this.findIn("changes", rows.flatMap((r) => [r.left?.text ?? null, r.right?.text ?? null]));
+    this.revealFound((item) => item >> 1);
     const id = `v-side-${this.viewerId}`;
     const tint = (c, a) => `${c.slice(0, 7)}${a}`;
-    const cell = (side, color, runs, range) => {
+    const cell = (side, color, runs, range, ranges) => {
       if (!side) return div().flex_1().min_w(0).h_full().bg(tint(t.foreground, "0a"));
       return h_flex().flex_1().min_w(0).h_full().items_center().overflow_hidden()
         .when(Boolean(color), (el) => el.bg(tint(color, "26")))
         .child(div().w(3).h_full().flex_none().when(Boolean(color), (el) => el.bg(color)))
         .child(div().w(size * 3.5).pr(size).flex_none().text_right().text_color(color ?? t.dim).child(String(side.number)))
-        .child(h_flex().flex_1().min_w(0).overflow_hidden().whitespace_nowrap().children(markRuns(runs, range).map(([kind, text, marked]) => {
+        .child(h_flex().flex_1().min_w(0).overflow_hidden().whitespace_nowrap().children(this.withFound(markRuns(runs, range), ranges).map(([kind, text, marked, find]) => {
           const st = palette[kind];
           return div().flex_none().whitespace_nowrap().text_color(st?.color ?? t.foreground)
             .when(Boolean(marked) && Boolean(color), (el) => el.bg(tint(color, "59")).rounded(2))
+            .when(Boolean(find), (el) => el.bg(this.foundBg(find, t)).rounded(2))
             .when(Boolean(st?.italic), (el) => el.italic()).when(Boolean(st?.bold), (el) => el.font_weight(700)).child(text);
         })));
     };
-    const row = (r) => {
+    const row = (r, i) => {
       const right = r.right ? this.tokens?.[r.right.number - 1] ?? [["plain", r.right.text]] : null;
       return h_flex().id(`v-${r.key}`).h(rowH).w_full()
-        .child(cell(r.left, r.kind === "same" ? null : t.ansi1, r.left?.runs, r.words?.left))
+        .child(cell(r.left, r.kind === "same" ? null : t.ansi1, r.left?.runs, r.words?.left, found.get(i * 2)))
         .child(div().w(1).h_full().flex_none().bg(t.border))
-        .child(cell(r.right, r.kind === "same" ? null : t.ansi2, right, r.words?.right));
+        .child(cell(r.right, r.kind === "same" ? null : t.ansi2, right, r.words?.right, found.get(i * 2 + 1)));
     };
     const label = (name, note) => h_flex().flex_1().min_w(0).px(12).gap(6).items_center()
       .child(div().text_color(t.muted).child(name)).child(div().truncate().child(note));
-    const list = v_virtual_list(id, rows.length, rowH, (i) => rows[i].key, (range) => rows.slice(range.start, range.end).map(row)).size_full();
+    const list = v_virtual_list(id, rows.length, rowH, (i) => rows[i].key, (range) => rows.slice(range.start, range.end).map((r, k) => row(r, range.start + k)))
+      .track_scroll(this.listScroll).size_full();
     return v_flex().flex_1().min_h(0).min_w(0)
       .child(h_flex().h(24).flex_none().border_b(1).border_color(t.border).text_size(11).text_color(t.dim)
         .child(label("HEAD", "· last commit")).child(div().w(1).h_full().bg(t.border)).child(label("Working Tree", "· this file")))
