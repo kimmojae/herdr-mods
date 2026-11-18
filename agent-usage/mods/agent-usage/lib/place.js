@@ -7,13 +7,19 @@ const GAP = 6, EDGE = 8;
 // button is 24px, 8px in from the block's right edge).
 export const GUESS = { right: 8, bottom: 26 };
 
-export function offsetsOf(bounds, view) {
-  return { right: view.width - (bounds.x + bounds.width), bottom: view.height - bounds.y };
+// The pointer, the button and the window are measured on screen, after zoom; the place is kept
+// at zoom 1, like the popup's width and height, so it holds when the zoom changes.
+const scale = (zoom) => (zoom > 0 ? zoom : 1);
+
+export function offsetsOf(bounds, view, zoom = 1) {
+  const z = scale(zoom);
+  return { right: (view.width - (bounds.x + bounds.width)) / z, bottom: (view.height - bounds.y) / z };
 }
 
-export function panelAt(offsets, view, height, width) {
+export function panelAt(offsets, view, height, width, zoom = 1) {
+  const z = scale(zoom);
   return {
-    x: Math.max(EDGE, view.width - offsets.right - width),
-    y: Math.max(EDGE, view.height - offsets.bottom - height - GAP),
+    x: Math.max(EDGE, view.width - (offsets.right + width) * z),
+    y: Math.max(EDGE, view.height - (offsets.bottom + height) * z - GAP),
   };
 }

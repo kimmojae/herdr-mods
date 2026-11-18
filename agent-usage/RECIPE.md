@@ -41,7 +41,9 @@ the bottom status row, one panel. This is the brief; the files beside it are one
 - Esc or a click outside closes it; so does the button or `⌘⌥U` again. It opens above the
   button, right edges lined up, 6px apart. A mod learns where its block is only from a pointer
   event, so the button's place is kept (shared `agent-usage:place`) as its distance from the window's
-  bottom-right corner, which holds when the window is resized and after a restart; before the
+  bottom-right corner, at zoom 1 like the popup's size (pointer and window are measured after
+  zoom), which holds when the window is resized, the zoom changes (an open panel opens again
+  there) and after a restart; before the
   pointer has ever crossed it, it is taken to be the right end of a 28px status row.
 
 ## Where the numbers come from

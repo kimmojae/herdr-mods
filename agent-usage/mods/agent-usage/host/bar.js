@@ -16,6 +16,10 @@ const EVERY = 5 * 60 * 1000;
 // button: a toggle this soon after a close is that same click.
 const SAME_CLICK = 400;
 
+// Everything a mod measures (pointer, window, its own size) is on screen, after zoom; layout px
+// and a popup's size are at zoom 1.
+const zoom = () => Number(settings().zoom) || 1;
+
 export const barMethods = {
   initBar(cx) {
     // Shared state outlives a restart; a panel open then is gone now.
@@ -50,9 +54,10 @@ export const barMethods = {
   },
 
   openPanel() {
-    const height = panelHeight(loadReadings());
+    const height = panelHeight(loadReadings()), z = zoom();
     this.openHeight = height;
-    const at = this.view ? panelAt(shared(key("place")) ?? GUESS, this.view, height, PANEL_WIDTH) : "pointer";
+    this.openZoom = z;
+    const at = this.view ? panelAt(shared(key("place")) ?? GUESS, this.view, height, PANEL_WIDTH, z) : "pointer";
     const id = openOverlay({ mod: NAME, kind: "popup", frame: "none", width: PANEL_WIDTH, height, at, props: { mode: "panel" } });
     setShared(key("open"), id);
   },
@@ -61,7 +66,7 @@ export const barMethods = {
   fitBlock(width) {
     this.buttonWidth = width;
     const block = ownBlock(layout(), NAME);
-    const px = block && fitWidth(block, width, Number(settings().zoom) || 1);
+    const px = block && fitWidth(block, width, zoom());
     if (px) run("layout.resize", { id: block.id, px });
   },
 
@@ -69,7 +74,7 @@ export const barMethods = {
   learnPlace(e) {
     if (!this.view || !e?.local_position) return;
     const bounds = e.bounds ?? { x: e.position.x - e.local_position.x, y: e.position.y - e.local_position.y, width: this.buttonWidth ?? 0 };
-    const place = offsetsOf(bounds, this.view), now = shared(key("place"));
+    const place = offsetsOf(bounds, this.view, zoom()), now = shared(key("place"));
     if (now?.right !== place.right || now?.bottom !== place.bottom) setShared(key("place"), place);
   },
 
@@ -86,7 +91,7 @@ export const barMethods = {
   },
 
   // A popup placed by one height and drawn at another floats off the button or covers it: when
-  // the poll the panel started finds another account or a new error, open it again. Not while
+  // the poll the panel started finds another account or a new error, or the zoom changes, open it again. Not while
   // drawing: a closeOverlay there leaves the old popup open, so it goes through the command queue.
   fitPanel(readings) {
     if (this.refitting || !this.misfit(readings)) return;
@@ -95,7 +100,8 @@ export const barMethods = {
   },
 
   misfit(readings) {
-    return Boolean(shared(key("open"))) && this.openHeight !== undefined && panelHeight(readings) !== this.openHeight;
+    return Boolean(shared(key("open"))) && this.openHeight !== undefined
+      && (panelHeight(readings) !== this.openHeight || zoom() !== this.openZoom);
   },
 
   refit() {
