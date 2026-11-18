@@ -2,7 +2,7 @@
 // a click or ⌘⌥U opens the panel above it.
 import { div } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
-import { theme, shared, setShared, openOverlay, closeOverlay, nextCommand, run, layout } from "herdr";
+import { theme, shared, setShared, openOverlay, closeOverlay, nextCommand, run, layout, settings } from "herdr";
 import { NAME, key } from "../lib/name.js";
 import { left, panelHeight } from "../lib/format.js";
 import { ownBlock, fitWidth, SIDE } from "../lib/layout.js";
@@ -61,7 +61,7 @@ export const barMethods = {
   fitBlock(width) {
     this.buttonWidth = width;
     const block = ownBlock(layout(), NAME);
-    const px = block && fitWidth(block, width);
+    const px = block && fitWidth(block, width, Number(settings().zoom) || 1);
     if (px) run("layout.resize", { id: block.id, px });
   },
 

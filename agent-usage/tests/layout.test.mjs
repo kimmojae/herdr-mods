@@ -21,3 +21,9 @@ test("fitWidth is the button plus the block's side padding, or null when it alre
   assert.equal(fitWidth({ id: "agent-usage", size: { weight: 1.2 } }, 240.4), 257);
   assert.equal(fitWidth({ id: "agent-usage", size: { px: 200 } }, 0), null);
 });
+
+test("fitWidth takes the zoom out of the measured width: layout px are at zoom 1", () => {
+  assert.equal(fitWidth({ id: "agent-usage", size: { px: 200 } }, 216.36, 0.9), 257);
+  assert.equal(fitWidth({ id: "agent-usage", size: { px: 200 } }, 480.8, 2), 257);
+  assert.equal(fitWidth({ id: "agent-usage", size: { px: 200 } }, 240.4, undefined), 257);
+});

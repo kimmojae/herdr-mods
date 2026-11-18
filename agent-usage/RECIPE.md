@@ -10,7 +10,8 @@ the bottom status row, one panel. This is the brief; the files beside it are one
 
 - A block beside `workspace-status` in the 28px status row, `chrome` background, a 1px
   `border` line on top like the status beside it. The block sizes itself to the button
-  (`layout.resize` to the button's width plus 8px a side), so `workspace-status` keeps the rest
+  (`layout.resize` to the button's width plus 8px a side; the width is measured after zoom and
+  divided by it, as a layout's px are at zoom 1), so `workspace-status` keeps the rest
   of the row. One button for everything: 24px high, 8px side padding, 6px corners,
   `hover` on hover, `selected` while the panel is open. Tooltip "Agent usage (⌘⌥U)".
 - Per account, 14px apart, all alike: the logo (13px; each provider's mark in its own colours), then two lines, `5h` over `7d` (10px terminal font, `dim`, 11px line

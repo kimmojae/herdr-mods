@@ -14,8 +14,9 @@ export function ownBlock(node, mod) {
 }
 
 // The px the block wants for a button this wide; null when it has it already (or no width yet).
-export function fitWidth(block, buttonWidth) {
+// The button's width is measured on screen, after zoom; a layout's px are at zoom 1.
+export function fitWidth(block, buttonWidth, zoom = 1) {
   if (!buttonWidth) return null;
-  const px = Math.ceil(buttonWidth) + 2 * SIDE;
+  const px = Math.ceil(buttonWidth / (zoom > 0 ? zoom : 1)) + 2 * SIDE;
   return block?.size?.px === px ? null : px;
 }
