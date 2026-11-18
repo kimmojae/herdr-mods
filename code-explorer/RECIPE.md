@@ -14,7 +14,8 @@ Markdown, images and HTML. ![code-explorer](preview.png)
   a 10-second timer covers another machine's folders.
 - **Rows** 28px, indent 8 + 18 per level: chevron 12px (`dim`), Symbols icon 16px in full colour,
   name, git letter 11px as Cursor shows them (U untracked, A added, M, D, ! conflict); a folder
-  holding changes gets a 9px ● in its strongest change's colour. Name and mark take the theme's
+  holding changes gets a 9px ● in the colour of its first changed path, as Cursor does: in path
+  order (case ignored), no letter outranking another; deleted files colour no folder. Name and mark take the theme's
   `gitDecoration.*` colour (Cursor's defaults where the theme has none: U `#73c991`, A `#81b88b`,
   M `#e2c08d`, D `#c74e39`, ! `#e4676b`; generated into `syntax/*.json`). Ignored rows at 42% opacity. The
   selected / active file row has `selected` background.

@@ -29,7 +29,7 @@ test("parseStatus keys are NFC so NFD names from a folder listing still match", 
 
 const changed = parseStatus(" M backend/app/engine.py\0?? sample/\0?? backend/new.py\0UU web/a.ts\0", "/r");
 
-test("folderMarks marks every folder above a change, the strongest letter winning", () => {
+test("folderMarks marks every folder above a change, with its first changed path's letter", () => {
   const folders = folderMarks(changed, "/r");
   assert.equal(folders.get("/r/backend"), "M");
   assert.equal(folders.get("/r/backend/app"), "M");
@@ -37,6 +37,18 @@ test("folderMarks marks every folder above a change, the strongest letter winnin
   assert.equal(folders.get("/r/sample"), "U");
   assert.equal(folders.has("/r"), false);
   assert.equal(folders.has("/r/docs"), false);
+});
+
+test("folderMarks colours folders as Cursor does: path order, not the strongest letter, and no deleted files", () => {
+  const marks = parseStatus([" M naps/README.md", "?? naps/keys.json", " M naps/layouts/naps.json", "?? naps/mods/",
+    "D  gone/a.js", " M kept/b.js", "D  kept/a.js", "UU mixed/z.ts", " M mixed/a.ts", ""].join("\0"), "/r");
+  const folders = folderMarks(marks, "/r");
+  assert.equal(folders.get("/r/naps"), "U"); // keys.json comes first: case is ignored, README.md is not first
+  assert.equal(folders.get("/r/naps/layouts"), "M");
+  assert.equal(folders.get("/r/naps/mods"), "U");
+  assert.equal(folders.has("/r/gone"), false);
+  assert.equal(folders.get("/r/kept"), "M");
+  assert.equal(folders.get("/r/mixed"), "M");
 });
 
 test("markOf finds a file's letter, a folder's, and files inside an untracked folder (U)", () => {
