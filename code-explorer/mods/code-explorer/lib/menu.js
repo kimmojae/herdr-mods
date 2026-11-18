@@ -39,13 +39,13 @@ export function menuGroups(target) {
   ];
 }
 
-/** The header's ⋯ menu: the panel's settings, then light/dark for the whole window (`dark`: now). */
-export function headerGroups(prefs, { dark = true } = {}) {
+/** The header's ⋯ menu: the panel's settings. */
+export function headerGroups(prefs) {
   const check = (on) => (on ? "✓" : "");
   return [[
     item("click-opens", "Click Opens", { submenu: "clickOpens" }),
     item("pref:hideDots", "Hide Dotfiles", { shortcut: check(prefs.hideDots) }),
     item("pref:hideIgnored", "Hide Ignored Files", { shortcut: check(prefs.hideIgnored) }),
     item("pref:followActive", "Follow Active File", { shortcut: check(prefs.followActive) }),
-  ], [item("appearance", dark ? "Light Mode" : "Dark Mode", { shortcut: "⌥⌘L" })]];
+  ]];
 }

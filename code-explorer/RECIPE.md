@@ -52,7 +52,7 @@ Markdown, images and HTML. ![code-explorer](preview.png)
   2+ browsers) — all local only —, open-side, open-tab, open-changes (an `M` file), reveal, terminal | add-agent, add-new-agent |
   copy-path, copy-rel, copy-name. Folders have no Expand/Collapse (a click does that, ⌘← collapses
   all, as in Cursor); the empty area is the root folder's menu; another machine hides the app items and Reveal.
-- Header ⋯: Click Opens, Hide Dotfiles, Hide Ignored Files, Follow Active File | Light Mode / Dark Mode. A viewer's ⋯ is the file menu without
+- Header ⋯: Click Opens, Hide Dotfiles, Hide Ignored Files, Follow Active File. A viewer's ⋯ is the file menu without
   the app items (its header has them) and Open in New Tab. Installed apps
   are looked for at start and again when a menu opens over 5 minutes later.
 - Editors: `apps.jxa editors` scans /Applications, ~/Applications and JetBrains Toolbox's folder:
@@ -77,8 +77,8 @@ Markdown, images and HTML. ![code-explorer](preview.png)
   counts letters of any script as word letters; at most 9,999. Changes searches HEAD then the file,
   row by row; the current match's row scrolls to the middle.
 - Keys under `mod:code-explorer` in keys.json: `cmd-alt-c`, `cmd-alt-shift-c`, `cmd-alt-r`, `ctrl-enter`.
-  Global `cmd-alt-l` (and header ⋯ › Light Mode / Dark Mode): light ↔ dark, by writing `appearance` to
-  settings.json (live; Herdr has no command for it); any copy on screen takes it, once per 0.5 s.
+  No light/dark switch: that is [naps](../naps/)'s button and ⌘⌥L (a mod key reaches only copies
+  on screen, so here it failed with Files closed and no viewer).
   Global `cmd-e`: `layout.toggle {id: "panel"}` opens and closes the right panel (Files, or Changes if
   that was last picked). Not a mod command: Herdr doesn't deliver key commands to a hidden copy,
   so the mod couldn't reopen its own panel.

@@ -168,14 +168,34 @@
           ]
         },
         {
-          "id": "status",
-          "type": "block",
+          "id": "status-row",
+          "type": "row",
           "size": {
             "px": 28
           },
-          "content": {
-            "mod": "workspace-status"
-          }
+          "resizable": false,
+          "children": [
+            {
+              "id": "status",
+              "type": "block",
+              "size": {
+                "weight": 1
+              },
+              "content": {
+                "mod": "workspace-status"
+              }
+            },
+            {
+              "id": "naps",
+              "type": "block",
+              "size": {
+                "px": 36
+              },
+              "content": {
+                "mod": "naps"
+              }
+            }
+          ]
         }
       ]
     }

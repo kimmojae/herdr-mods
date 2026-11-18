@@ -81,11 +81,8 @@ test("Open With is gone: editors and browsers have their own items", () => {
   assert.equal(ids(menuGroups({ ...file, editor: "Zed", editors: 3 })).flat().includes("open-with"), false);
 });
 
-test("the header menu: the panel's settings, then light/dark", () => {
-  assert.deepEqual(ids(headerGroups({})), [["click-opens", "pref:hideDots", "pref:hideIgnored", "pref:followActive"], ["appearance"]]);
-  const [dark, light] = [headerGroups({}, { dark: true })[1][0], headerGroups({}, { dark: false })[1][0]];
-  assert.deepEqual([dark.label, dark.shortcut], ["Light Mode", "⌥⌘L"]);
-  assert.equal(light.label, "Dark Mode");
+test("the header menu: the panel's settings, no light/dark (naps has it)", () => {
+  assert.deepEqual(ids(headerGroups({})), [["click-opens", "pref:hideDots", "pref:hideIgnored", "pref:followActive"]]);
   assert.equal(headerGroups({ hideDots: true })[0][1].shortcut, "✓");
   assert.equal(headerGroups({ hideIgnored: true })[0][2].shortcut, "✓");
 });

@@ -3,11 +3,11 @@
 // ↑ ↓ move, → or Enter opens a submenu, ← or Esc goes back, Enter runs. Items close the popup first.
 import { div, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
-import { props, closeOverlay, openOverlay, theme, settings } from "herdr";
+import { props, closeOverlay, openOverlay, theme } from "herdr";
 import { menuGroups, headerGroups } from "../lib/menu.js";
 import { NAME } from "../lib/name.js";
 import { editorChoices, browserChoices } from "../lib/openwith.js";
-import { revealInFinder, openInTerminal, copyText, askSidebar, toggleAppearance } from "./actions.js";
+import { revealInFinder, openInTerminal, copyText, askSidebar } from "./actions.js";
 import { installedApps, iconPath, openWith, defaultEditor, setDefaultEditor, defaultBrowser, refreshAppsIfStale } from "./apps.js";
 import { agentChoices, newAgentChoices, insertIntoAgent, programIcon } from "./agents.js";
 import { openFile } from "./viewer.js";
@@ -47,7 +47,7 @@ const ROW = 28, SEP = 9, PAD = 5, WIDTH = 236;
 const groupsFor = (target) => {
   const apps = installedApps();
   return target.kind === "header"
-    ? headerGroups(target.prefs ?? {}, { dark: Boolean(settings().dark) })
+    ? headerGroups(target.prefs ?? {})
     : menuGroups({ ...target, editor: defaultEditor()?.name, editors: apps.editors.length, browsers: apps.browsers.length });
 };
 
@@ -120,7 +120,6 @@ export const menuMethods = {
         if (t.viewer) return openFile({ path: t.path, rel: t.rel, root: t.root, on: t.on }, item.id === "open-side" ? "side" : "pinned");
         return askSidebar(item.id, { root: t.root, treePath: t.treePath });
       case "open-in-editor": { const app = defaultEditor(); return app && openWith(app, t.path, t.line ?? null); }
-      case "appearance": return toggleAppearance();
       case "open-in-browser": { const app = defaultBrowser(); return app && openWith(app, t.path); }
       case "open-changes": return openFile({ path: t.path, rel: t.rel, root: t.root, on: t.on }, "preview", { diff: true });
       default:

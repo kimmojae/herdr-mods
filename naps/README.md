@@ -18,7 +18,8 @@ Read ~/.config/herdr-app/AGENTS.md, then add this layout: https://github.com/kim
 ```
 
 Both themes then appear in Settings → Look. Naps is dark only for now: in light mode the layout
-uses Herdr's `paper`. Switch with Settings → Appearance, or ⌥⌘L with code-explorer installed.
+uses Herdr's `paper`. Switch with the ☀︎/☾ button at the right end of the bottom bar, or ⌥⌘L
+anywhere in the layout.
 
 Want [code-explorer](../code-explorer/) too? Install it after this layout and it takes over the
 Files panel.
@@ -30,4 +31,5 @@ Read ~/.config/herdr-app/AGENTS.md, then remove the naps layout and its themes
 ```
 
 By hand: switch to another layout (⌃⇧L) and pick another theme in Settings → Look, then delete
-`layouts/naps.json` and `themes/naps.json`, `themes/naps-dusk-gold.json` in `~/.config/herdr-app`.
+`layouts/naps.json`, `themes/naps.json`, `themes/naps-dusk-gold.json` and `mods/naps/` in
+`~/.config/herdr-app`, and the `layout:naps` section from `keys.json`.

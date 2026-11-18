@@ -1,0 +1,5 @@
+{
+  "layout:naps": {
+    "cmd-alt-l": "naps.toggle-appearance"
+  }
+}

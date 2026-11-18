@@ -16,7 +16,6 @@ import { parseHunks, allAdded } from "../lib/hunks.js";
 import { markdownBlocks } from "../lib/markdown.js";
 import { cacheName, staleFiles } from "../lib/cache.js";
 import { openWith, defaultEditor } from "./apps.js";
-import { toggleAppearance } from "./actions.js";
 
 const VIEWERS = key("viewers");
 const MAX_CHARS = 400000, IMAGE_MAX = 20 * 1024 * 1024;
@@ -134,13 +133,11 @@ export const viewerMethods = {
       cx.notify();
     });
     cx.timer.every(5000, (cx) => { if (this.shown) { this.readHunks(this.shown, cx); if (this.shown.on) this.reload(cx); } });
-    // ⌘⌥L reaches the copies on screen; a viewer may be the only one (Files closed). "focus":
-    // pane.go gave this viewer the keyboard, for ⌘F.
+    // "focus": pane.go gave this viewer the keyboard, for ⌘F.
     cx.spawn(async () => {
       for (;;) {
         const command = String(await nextCommand()).split(".").pop();
-        if (command === "toggle-appearance") toggleAppearance();
-        else if (command === "focus") this.finding ? this.findInput.focus() : this.viewerFocus.focus();
+        if (command === "focus") this.finding ? this.findInput.focus() : this.viewerFocus.focus();
       }
     });
   },

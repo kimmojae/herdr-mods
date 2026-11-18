@@ -5,8 +5,7 @@
       "args": {
         "id": "panel"
       }
-    },
-    "cmd-alt-l": "code-explorer.toggle-appearance"
+    }
   },
   "mod:code-explorer": {
     "cmd-alt-c": "code-explorer.copy-path",

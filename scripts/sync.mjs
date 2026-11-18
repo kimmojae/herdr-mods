@@ -2,11 +2,11 @@
 // Installs a working copy of this repo's packages into a Herdr home, beside the released ones
 // people get from GitHub, which it never touches:
 //   code-explorer  the mod as code-explorer-test (with its keys)
-//   naps           the themes as <name>-test
+//   naps           the themes as <name>-test, the mod as naps-test (with its ⌘⌥L)
 //   agent-usage   the mod as agent-usage-test (with its ⌘⌥U key)
 // All when none is named. Then one layout, herdr-mods-test, puts together whatever is installed:
 // naps, in its -test themes if they're there, with code-explorer-test in Files and agent-usage-test
-// (or a released agent-usage) beside workspace-status. Copies, not links: Herdr won't load icons
+// (or a released agent-usage) and naps-test (or a released naps) beside workspace-status. Copies, not links: Herdr won't load icons
 // through a link. Runs `herdr-app check` on each mod's copy. --clean removes the named
 // packages' copies again, and the layout follows.
 // Usage: node scripts/sync.mjs [--home <dir>] [--no-check] [--dry-run] [--clean] [code-explorer] [naps] [agent-usage]
@@ -20,17 +20,18 @@ import { promisify } from "node:util";
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const copyOf = (mod) => `${mod}-test`;
 
-// naps's status block, replaced by a row: workspace-status and the mod beside it.
-function withStatusRow(node, mod) {
-  if (node?.id === "status") return { id: "status-row", type: "row", size: { px: 28 }, resizable: false, children: [
-    { id: "status", type: "block", size: { weight: 1 }, content: { mod: "workspace-status" } },
-    { id: "agent-usage", type: "block", size: { px: 160 }, content: { mod } }] };
-  return node?.children ? { ...node, children: node.children.map((c) => withStatusRow(c, mod)) } : node;
+// naps's status row with what is installed: agent-usage between workspace-status and naps's
+// light/dark button, the button only while a naps mod is there.
+function statusRow(node, usage, naps) {
+  if (node?.id === "status-row") return { ...node, children: node.children.flatMap((c) => c.id !== "naps" ? [c] : [
+    ...(usage ? [{ id: "agent-usage", type: "block", size: { px: 160 }, content: { mod: usage } }] : []),
+    ...(naps ? [{ ...c, content: { ...c.content, mod: naps } }] : [])]) };
+  return node?.children ? { ...node, children: node.children.map((c) => statusRow(c, usage, naps)) } : node;
 }
 
 // The mod packages, and whether a copy's global keys come along (code-explorer's stay with the
 // released mod).
-const MODS = { "code-explorer": { globals: false }, "agent-usage": { globals: true } };
+const MODS = { "code-explorer": { globals: false }, "naps": { globals: false }, "agent-usage": { globals: true } };
 const LAYOUT = "herdr-mods-test";
 // The per-package test layouts this script made before there was one.
 const OLD_LAYOUTS = ["code-explorer-test", "usage-test", "naps-test"];
@@ -111,18 +112,19 @@ async function testLayout(home, dry) {
   }
   const has = (rel) => exists(join(home, rel));
   const files = await has(`mods/${copyOf("code-explorer")}`);
-  const usage = (await has(`mods/${copyOf("agent-usage")}`)) ? copyOf("agent-usage") : (await has("mods/agent-usage")) ? "agent-usage" : null;
+  const installed = async (mod) => (await has(`mods/${copyOf(mod)}`)) ? copyOf(mod) : (await has(`mods/${mod}`)) ? mod : null;
+  const usage = await installed("agent-usage"), naps = await installed("naps");
   const layout = JSON.parse(await readFile(join(ROOT, "naps/layouts/naps.json"), "utf8"));
   let themed = false;
   for (const mode of ["light", "dark"]) {
     const name = layout.theme?.[mode];
     if (name && (await has(`themes/${name}-test.json`))) { layout.theme[mode] = `${name}-test`; themed = true; }
   }
-  if (!files && usage !== copyOf("agent-usage") && !themed) {
+  if (!files && usage !== copyOf("agent-usage") && naps !== copyOf("naps") && !themed) {
     if (await exists(file)) { if (!dry) await rm(file); console.log(`removed layouts/${LAYOUT}.json`); }
     return;
   }
-  let text = JSON.stringify(usage ? withStatusRow(layout, usage) : layout, null, 2) + "\n";
+  let text = JSON.stringify(statusRow(layout, usage, naps), null, 2) + "\n";
   if (files) text = text.replace(/"mod": "files"/g, `"mod": "${copyOf("code-explorer")}"`);
   if (!dry) {
     await mkdir(join(home, "layouts"), { recursive: true });
@@ -131,8 +133,9 @@ async function testLayout(home, dry) {
   console.log(`layout: ${LAYOUT}.json`);
 }
 
-// The copy's own keys (mod:<copy>, and for agent-usage its global ⌘⌥U) in the person's keys.json.
-// `add` false takes them out again; a global key is removed only while it still points at the copy.
+// The copy's own keys (mod:<copy>; naps's layout:naps ones under layout:herdr-mods-test, the layout
+// its copy shows in; for agent-usage its global ⌘⌥U) in the person's keys.json.
+// `add` false takes them out again; a global or layout key is removed only while it still points at the copy.
 async function devKeys(home, dry, add, MOD) {
   const COPY = copyOf(MOD);
   const file = join(home, "keys.json");
@@ -141,9 +144,16 @@ async function devKeys(home, dry, add, MOD) {
   const rename = (a) => a.replace(`${MOD}.`, `${COPY}.`);
   const section = `mod:${COPY}`;
   const globals = MODS[MOD].globals ? Object.entries(own.global ?? {}).map(([k, a]) => [k, rename(a)]) : [];
+  const inLayout = Object.entries(own["layout:naps"] ?? {}).map(([k, a]) => [k, rename(a)]);
+  const layoutSection = `layout:${LAYOUT}`;
   let changed = false;
   if (add) {
     if (own[`mod:${MOD}`]) { keys[section] = Object.fromEntries(Object.entries(own[`mod:${MOD}`]).map(([k, a]) => [k, rename(a)])); changed = true; }
+    for (const [k, a] of inLayout) {
+      if (keys[layoutSection]?.[k] === a) continue;
+      keys[layoutSection] = { ...keys[layoutSection], [k]: a };
+      changed = true;
+    }
     // A chord the person already uses for something else (the released mod too) stays theirs.
     for (const [k, a] of globals) {
       const now = keys.global?.[k];
@@ -155,6 +165,8 @@ async function devKeys(home, dry, add, MOD) {
   } else {
     if (section in keys) { delete keys[section]; changed = true; }
     for (const [k, a] of globals) if (keys.global?.[k] === a) { delete keys.global[k]; changed = true; }
+    for (const [k, a] of inLayout) if (keys[layoutSection]?.[k] === a) { delete keys[layoutSection][k]; changed = true; }
+    if (keys[layoutSection] && !Object.keys(keys[layoutSection]).length) delete keys[layoutSection];
   }
   if (!changed) return;
   if (!dry) await writeFile(file, JSON.stringify(keys, null, 2) + "\n");

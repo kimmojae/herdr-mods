@@ -14,5 +14,9 @@ code-explorer/mods/code-explorer/ui/collapse.svg and ui/more.svg are Lucide's "c
 "ellipsis" icons (https://lucide.dev), Copyright (c) Lucide Contributors, licensed under the ISC
 License. The licence text ships beside them in code-explorer/mods/code-explorer/ui/LICENSE-lucide.txt.
 
+naps/mods/naps/icons/sun.svg and icons/moon.svg are Lucide's "sun" and "moon" icons
+(https://lucide.dev), Copyright (c) Lucide Contributors, licensed under the ISC License. The licence
+text ships beside them in naps/mods/naps/icons/LICENSE-lucide.txt.
+
 The Naps themes (naps/themes/) and the Naps logo (naps/logo.png) come from the author's own Naps
 theme for VS Code (https://github.com/kimmojae/vscode-naps-theme), licensed under the MIT License.

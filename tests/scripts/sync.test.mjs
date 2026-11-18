@@ -94,14 +94,38 @@ test("sync code-explorer installs only the mod, its keys and its layout", async 
   assert.equal(await exists(join(dir, "themes/naps-dusk-gold-test.json")), false);
 });
 
-test("sync naps installs only the naps themes, and the layout", async () => {
+test("sync naps installs only the naps themes, its mod with its key, and the layout", async () => {
   const dir = await home();
   await run("--home", dir, "--no-check", "naps");
   assert.ok(await exists(join(dir, LAYOUT)));
   assert.ok(await exists(join(dir, "themes/naps-test.json")));
+  assert.match(await readFile(join(dir, "mods/naps-test/lib/name.js"), "utf8"), /NAME = "naps-test"/);
   assert.equal(await exists(join(dir, "mods/agent-usage-test")), false);
   assert.equal(await readFile(join(dir, "mods/code-explorer-test/stale.js"), "utf8"), "old");
-  assert.deepEqual(await json(join(dir, "keys.json")), OWN_KEYS);
+  assert.deepEqual(await json(join(dir, "keys.json")), { ...OWN_KEYS, "layout:herdr-mods-test": { "cmd-alt-l": "naps-test.toggle-appearance" } });
+});
+
+test("the status row holds workspace-status, agent-usage, then naps's light/dark button", async () => {
+  const dir = await home();
+  await run("--home", dir, "--no-check");
+  const row = JSON.stringify((await json(join(dir, LAYOUT))));
+  assert.match(row, /"mod":"workspace-status".*"mod":"agent-usage-test".*"mod":"naps-test"/);
+  const bare = await mkdtemp(join(tmpdir(), "herdr-home-"));
+  await mkdir(join(bare, "mods/naps"), { recursive: true });
+  await run("--home", bare, "--no-check", "agent-usage");
+  assert.match(JSON.stringify(await json(join(bare, LAYOUT))), /"mod":"agent-usage-test".*"mod":"naps"/);
+  const none = await mkdtemp(join(tmpdir(), "herdr-home-"));
+  await run("--home", none, "--no-check", "agent-usage");
+  assert.doesNotMatch(await readFile(join(none, LAYOUT), "utf8"), /"mod": "naps/);
+});
+
+test("sync --clean naps removes naps-test and its key", async () => {
+  const dir = await home();
+  await run("--home", dir, "--no-check");
+  await run("--home", dir, "--clean", "naps");
+  assert.equal(await exists(join(dir, "mods/naps-test")), false);
+  assert.equal("layout:herdr-mods-test" in (await json(join(dir, "keys.json"))), false);
+  assert.doesNotMatch(await readFile(join(dir, LAYOUT), "utf8"), /naps-test"/);
 });
 
 test("sync --clean naps removes only naps's -test themes; the layout goes back to the released ones", async () => {

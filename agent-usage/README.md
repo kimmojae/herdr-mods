@@ -11,9 +11,10 @@ Bars and numbers show what's **left**. Under 30% left, they turn orange.
 
 ## Install
 
-Copy `mods/agent-usage/` into `~/.config/herdr-app/mods/`. Then, in a layout of yours (a clone of
-`main`: `herdr-app do layout.clone '{"name":"main","as":"my-main"}'`), replace the `status`
-block with this row:
+Copy `mods/agent-usage/` into `~/.config/herdr-app/mods/`. With the [naps](../naps/) layout, add
+the `agent-usage` block below to its `status-row`, between `status` and `naps`. Otherwise, in a
+layout of yours (a clone of `main`: `herdr-app do layout.clone '{"name":"main","as":"my-main"}'`),
+replace the `status` block with this row:
 
 ```json
 { "id": "status-row", "type": "row", "size": { "px": 28 }, "resizable": false, "children": [

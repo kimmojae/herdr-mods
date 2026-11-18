@@ -10,7 +10,7 @@ import { resolveIcon } from "../lib/icons.js";
 import { parseIgnored, isIgnored, isExcluded } from "../lib/ignore.js";
 import { relativeTo } from "../lib/paths.js";
 import { openMenu } from "./menu-view.js";
-import { lastAsk, copyText, revealInFinder, openInFinder, toggleAppearance } from "./actions.js";
+import { lastAsk, copyText, revealInFinder, openInFinder } from "./actions.js";
 import { loadApps, defaultEditor, openWith, iconPath, FINDER } from "./apps.js";
 import { startAgentWith } from "./agents.js";
 import { openFile, keepOpen, pruneViewers, cleanCache, viewerEntries, loadPalettes } from "./viewer.js";
@@ -380,7 +380,6 @@ export const treeMethods = {
   runCommand(command, cx) {
     const path = this.sel ?? this.activePath();
     if (command === "focus") return this.treeFocus?.focus();
-    if (command === "toggle-appearance") return toggleAppearance();
     if (path == null) return;
     const t = this.targetOf(path, Boolean(this.visible?.find(r => r.path === path)?.dir));
     if (command === "copy-path") copyText(cx, t.path);

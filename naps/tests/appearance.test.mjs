@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { flipAppearance } from "../mods/code-explorer/lib/appearance.js";
+import { flipAppearance } from "../mods/naps/lib/appearance.js";
 
 const settings = '{\n  "zoom": 1,\n  "theme": "naps-dusk-gold",\n  "appearance": "dark"\n}\n';
 

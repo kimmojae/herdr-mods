@@ -27,7 +27,7 @@ changed.
   Every view follows the file as it changes. (HTML: open it in your browser; here it's text only.)
 - **Hands files to agents.** Right-click › Add File to Agent types `@path ` into a running agent
   without pressing Enter; Add File to New Agent starts one in the repo first.
-- **Keys.** ⌘E for the panel, ⌥⌘L for light and dark, ⌘← to collapse everything.
+- **Keys.** ⌘E for the panel, ⌘← to collapse everything.
 
 ## Install
 
@@ -49,7 +49,7 @@ Read ~/.config/herdr-app/AGENTS.md, then remove the code-explorer mod
 
 By hand, in `~/.config/herdr-app`: point your layout's Files block back at `files`, delete
 `mods/code-explorer/`, and take its keys out of `keys.json` (the `mod:code-explorer` section and
-`cmd-e`, `cmd-alt-l` under `global`).
+`cmd-e` under `global`).
 
 ## Use
 
@@ -64,7 +64,6 @@ By hand, in `~/.config/herdr-app`: point your layout's Files block back at `file
 | Key | Where | |
 |---|---|---|
 | ⌘E | anywhere | open or close the Files panel |
-| ⌥⌘L | anywhere | light ↔ dark (also ⋯ › Light Mode) |
 | ⌘← | Files | collapse all |
 | ↑ ↓ ← → · Enter · Space | Files | move, open and close folders · open pinned · preview |
 | ⌥⌘C · ⌥⇧⌘C | Files | copy path · copy relative path |
@@ -81,8 +80,7 @@ only tested on macOS.
 **What it runs:** `git` (status, ignored files, diffs; read-only, no locks), `sh`, `osascript`
 (which editors and browsers you have), `sips` (app icons, image sizes), `stat`, `open`, and your
 editor's own command-line tool (`cursor`, `code`, `idea`…). No network.
-**What it writes:** its hidden `.cache/` (image copies, app icons, cleaned as tabs close), and
-`appearance` in Herdr's `settings.json` when you switch light and dark.
+**What it writes:** its hidden `.cache/` (image copies, app icons, cleaned as tabs close).
 
 ## Limits
 
