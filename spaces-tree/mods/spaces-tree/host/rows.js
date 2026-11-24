@@ -550,8 +550,9 @@ export function sectionHeader(label, count, t, right = null) {
 // Rows coming and going (lib/presence.js): how long a grow-in or collapse runs, in ms.
 export const MOTION = 180;
 const EASE = { duration: MOTION, easing: "ease-out" };
-// A band row's height (it's fixed in practice: two lines in min ROW + 12) and the gap below it.
-export const BAND_ROW = ROW + 12;
+// A band row's height, fixed (two lines, 5px above and below) so the presence box that animates
+// it is exactly as tall as the row and never clips its rounded corners; and the gap below it.
+export const BAND_ROW = ROW + 18;
 export const BAND_GAP = 2;
 
 /**
@@ -595,7 +596,7 @@ export function bandRow(b, t, live = true) {
   return h_flex()
     .id(`band-row-${b.address}`)
     .flex_none()
-    .min_h(BAND_ROW)
+    .h(BAND_ROW)
     .py(5)
     .pl(8)
     .pr(8)

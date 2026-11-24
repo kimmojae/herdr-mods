@@ -29,7 +29,8 @@ Colour means agent state and PR state only; git's symbols and counts are `muted`
   native `transition("height" | "opacity")`; a leaving row keeps its last content and takes no
   clicks, then is dropped. The first row brings the whole section (header, rule) in the same
   way and the last one takes it away, so the tree below slides instead of jumping. A reorder
-  (longest wait first) just jumps. Each row is 40px with 2px under it, in a box of that height
+  (longest wait first) just jumps. Each row is a fixed 46px (two lines, 5px above and below: a box
+  shorter than the row would clip its rounded corners) with 2px under it, in a box of that height
   (`band-<address>`); nothing grows in at start. `lib/presence.js` keeps the books (entering,
   shown, leaving); an entering row is drawn once at 0 and again ~16ms later at full height (a
   one-shot `cx.timer.after`, as a transition only animates a later change), and one more
