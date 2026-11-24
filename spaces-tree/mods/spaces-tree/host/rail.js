@@ -1,11 +1,12 @@
 // The sidebar's rail (under 160px, as the shipped spaces mod, S:20, 501-515): the Needs-you
-// count, one 32px tile per space with an agent that isn't idle (and the shown one), and a
-// dashed `+N` tile that widens the sidebar back. Resting the pointer on a tile shows a card:
+// count, one 32px tile per space with an agent that isn't idle (and the shown one), a
+// dashed `+N` tile that widens the sidebar back, and at the bottom the shipped agents list's
+// » that does the same (on macOS the traffic lights hide workspace-chrome's toggle). Resting the pointer on a tile shows a card:
 // the space's name and folder, its branch and tags, and its agent rows (host/rows.js).
 // Never keeps a cx.
 import { div, svg } from "gpui-kit";
 import { h_flex, v_flex, HoverCard } from "gpui-base";
-import { run, layout, shared } from "herdr";
+import { run, layout, shared, setShared } from "herdr";
 import { MARK } from "../lib/colors.js";
 import { tail } from "../lib/tail.js";
 import { placeOf } from "../lib/git.js";
@@ -23,6 +24,12 @@ function find(node, id) {
     if (found) return found;
   }
   return null;
+}
+
+// Back to the width the sidebar had, as the shipped toggle does (it still sets the old flag).
+function widen() {
+  setShared("sidebar.collapsed", false);
+  run("layout.resize", { id: "sidebar", px: shared("sidebar.width") ?? 268 });
 }
 
 /** The rail goes by the sidebar's width, not a flag: dragging its edge narrows it too (S:20). */
@@ -66,7 +73,7 @@ export function drawRail(r, band, agentRows, t, ctx) {
     tiles.push(tile().id("rail-more").border(1).border_dashed().border_color(t.border)
       .text_size(11.5).text_color(t.dim).cursor_pointer().hover((s) => s.text_color(t.foreground))
       .tooltip("All spaces")
-      .on_click(() => run("layout.resize", { id: "sidebar", px: shared("sidebar.width") ?? 268 }))
+      .on_click(widen)
       .child(`+${r.more}`));
   }
   return v_flex().size_full().min_h(0).bg(t.chrome).text_size(13)
@@ -78,7 +85,13 @@ export function drawRail(r, band, agentRows, t, ctx) {
         .on_click(() => run("space.new"))
         .child(svg(`mods/workspace-chrome/plus.svg`).size(14))))
     .child(v_flex().id("rail").flex_1().min_h(0).pb(14).gap(4).items_center().overflow_y_scrollbar()
-      .children(tiles));
+      .children(tiles))
+    .child(h_flex().h(28).flex_none().items_center().justify_center()
+      .child(div().id("rail-widen").text_size(13).text_color(t.dim).cursor_pointer()
+        .hover((s) => s.text_color(t.foreground))
+        .tooltip("Show sidebar")
+        .on_click(widen)
+        .child("»")));
 }
 
 function spaceTile(sp, rows, t, ctx) {

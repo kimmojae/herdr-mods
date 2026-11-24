@@ -210,7 +210,10 @@ each in a box of its own height (40px with a second line, else 28px).
   `+` for a new space, then one 32px tile per space that has an agent that isn't idle: the
   space's initial on its `space.colors` colour, the status mark at the corner, the shown space
   selected. The rest fold into a dashed `+N` tile that widens the sidebar
-  (`layout.resize {id:"sidebar", px: shared("sidebar.width") ?? 268}`).
+  (`layout.resize {id:"sidebar", px: shared("sidebar.width") ?? 268}`, and `sidebar.collapsed`
+  set false, as the shipped toggle does). At the bottom, a 28px row with the shipped agents
+  list's `»` (13px, `dim`, `foreground` on hover) that widens it the same way: on macOS the
+  traffic lights hide workspace-chrome's toggle on the rail, so this is the way back.
 - Hovering a tile opens a 280px card at its right (`HoverCard`, `popover` background): name,
   folder, branch with the tail, then the space's agent rows (clickable). Click the tile:
   `space.select`. The rail is chosen by the width, not by the legacy `sidebar.collapsed` flag.
