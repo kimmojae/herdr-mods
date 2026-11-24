@@ -52,7 +52,8 @@ and Settings → Appearance (System / Light / Dark) picks the half.
 3. `herdr-app do layout.switch '{"name":"naps"}'`.
 4. With [code-explorer](../code-explorer/) wanted too: install it after this; its recipe points
    this layout's Files block at it. [agent-usage](../agent-usage/) goes into the status row,
-   between `status` and `naps`.
+   between `status` and `naps`. [spaces-tree](../spaces-tree/) replaces the layout's `sidebar-lists`
+   column (the `spaces` and `agents` blocks) with one block.
 
 ## Watch out
 

@@ -4,12 +4,14 @@
 //   code-explorer  the mod as code-explorer-test (with its keys)
 //   naps           the themes as <name>-test, the mod as naps-test (with its ⌘⌥L)
 //   agent-usage   the mod as agent-usage-test (with its ⌘⌥U key)
+//   spaces-tree   the mod as spaces-tree-test (it replaces the sidebar's spaces and agents lists)
 // All when none is named. Then one layout, herdr-mods-test, puts together whatever is installed:
 // naps, in its -test themes if they're there, with code-explorer-test in Files and agent-usage-test
-// (or a released agent-usage) and naps-test (or a released naps) beside workspace-status. Copies, not links: Herdr won't load icons
+// (or a released agent-usage) and naps-test (or a released naps) beside workspace-status, and
+// spaces-tree-test in place of the spaces and agents lists. Copies, not links: Herdr won't load icons
 // through a link. Runs `herdr-app check` on each mod's copy. --clean removes the named
 // packages' copies again, and the layout follows.
-// Usage: node scripts/sync.mjs [--home <dir>] [--no-check] [--dry-run] [--clean] [code-explorer] [naps] [agent-usage]
+// Usage: node scripts/sync.mjs [--home <dir>] [--no-check] [--dry-run] [--clean] [code-explorer] [naps] [agent-usage] [spaces-tree]
 import { readdir, readFile, writeFile, mkdir, cp, rm, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, relative } from "node:path";
@@ -29,13 +31,19 @@ function statusRow(node, usage, naps) {
   return node?.children ? { ...node, children: node.children.map((c) => statusRow(c, usage, naps)) } : node;
 }
 
+// naps's sidebar-lists (the spaces and agents blocks) as one block showing `mod`.
+function sidebarLists(node, mod) {
+  if (node?.id === "sidebar-lists") return { id: "sidebar-lists", type: "block", content: { mod } };
+  return node?.children ? { ...node, children: node.children.map((c) => sidebarLists(c, mod)) } : node;
+}
+
 // The mod packages, and whether a copy's global keys come along (code-explorer's stay with the
 // released mod).
-const MODS = { "code-explorer": { globals: false }, "naps": { globals: false }, "agent-usage": { globals: true } };
+const MODS = { "code-explorer": { globals: false }, "naps": { globals: false }, "agent-usage": { globals: true }, "spaces-tree": { globals: false } };
 const LAYOUT = "herdr-mods-test";
 // The per-package test layouts this script made before there was one.
 const OLD_LAYOUTS = ["code-explorer-test", "usage-test", "naps-test"];
-const PACKAGES = ["code-explorer", "naps", "agent-usage"];
+const PACKAGES = ["code-explorer", "naps", "agent-usage", "spaces-tree"];
 const test = (n) => n.replace(/\.json$/, "-test.json");
 // Herdr writes these into a mod folder itself; the cache is the mod's runtime state.
 const KEEP = (rel) => /^\.?cache(\/|$)/.test(rel) || rel.endsWith(".d.ts") || rel === "jsconfig.json";
@@ -114,17 +122,19 @@ async function testLayout(home, dry) {
   const files = await has(`mods/${copyOf("code-explorer")}`);
   const installed = async (mod) => (await has(`mods/${copyOf(mod)}`)) ? copyOf(mod) : (await has(`mods/${mod}`)) ? mod : null;
   const usage = await installed("agent-usage"), naps = await installed("naps");
+  const tree = await installed("spaces-tree");
   const layout = JSON.parse(await readFile(join(ROOT, "naps/layouts/naps.json"), "utf8"));
   let themed = false;
   for (const mode of ["light", "dark"]) {
     const name = layout.theme?.[mode];
     if (name && (await has(`themes/${name}-test.json`))) { layout.theme[mode] = `${name}-test`; themed = true; }
   }
-  if (!files && usage !== copyOf("agent-usage") && naps !== copyOf("naps") && !themed) {
+  if (!files && usage !== copyOf("agent-usage") && naps !== copyOf("naps") && tree !== copyOf("spaces-tree") && !themed) {
     if (await exists(file)) { if (!dry) await rm(file); console.log(`removed layouts/${LAYOUT}.json`); }
     return;
   }
-  let text = JSON.stringify(statusRow(layout, usage, naps), null, 2) + "\n";
+  const shown = tree === copyOf("spaces-tree") ? sidebarLists(layout, tree) : layout;
+  let text = JSON.stringify(statusRow(shown, usage, naps), null, 2) + "\n";
   if (files) text = text.replace(/"mod": "files"/g, `"mod": "${copyOf("code-explorer")}"`);
   if (!dry) {
     await mkdir(join(home, "layouts"), { recursive: true });

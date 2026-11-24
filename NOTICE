@@ -18,5 +18,10 @@ naps/mods/naps/icons/sun.svg and icons/moon.svg are Lucide's "sun" and "moon" ic
 (https://lucide.dev), Copyright (c) Lucide Contributors, licensed under the ISC License. The licence
 text ships beside them in naps/mods/naps/icons/LICENSE-lucide.txt.
 
+spaces-tree ports parts of the `spaces` and `agents` mods that ship with Herdr Desktop
+(https://github.com/herdrdev/herdr-app, defaults/mods/spaces and defaults/mods/agents), licensed
+under the Apache License, Version 2.0. Its UI glyphs are drawn from Herdr's own workspace-chrome
+mod at run time and are not copied here.
+
 The Naps themes (naps/themes/) and the Naps logo (naps/logo.png) come from the author's own Naps
 theme for VS Code (https://github.com/kimmojae/vscode-naps-theme), licensed under the MIT License.
