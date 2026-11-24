@@ -60,7 +60,7 @@ CLI signs itself in), and changes no Claude or Codex setting.
 The `get_usage` approach comes from
 [jmalicki/herdr-mod-ai-usage](https://github.com/jmalicki/herdr-mod-ai-usage) (MIT), via
 [nozikov/herdr-usage-limits](https://github.com/nozikov/herdr-usage-limits) (MIT). The Claude
-and Codex marks are from [LobeHub Icons](https://github.com/lobehub/lobe-icons) (MIT,
-`@lobehub/icons-static-svg` 1.102.0: `claude-color`, `codex-color` without its tile).
+and Codex marks are Herdr's own program icons (`icons/claude.svg`, `icons/codex.svg` in the
+Herdr home), the ones its tab bar shows.
 
 [RECIPE.md](RECIPE.md) is the brief to build it again.

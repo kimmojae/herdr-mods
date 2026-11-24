@@ -14,7 +14,7 @@ the bottom status row, one panel. This is the brief; the files beside it are one
   divided by it, as a layout's px are at zoom 1), so `workspace-status` keeps the rest
   of the row. One button for everything: 24px high, 8px side padding, 6px corners,
   `hover` on hover, `selected` while the panel is open. Tooltip "Agent usage (⌘⌥U)".
-- Per account, 14px apart, all alike: the logo (13px; each provider's mark in its own colours), then two lines, `5h` over `7d` (10px terminal font, `dim`, 11px line
+- Per account, 14px apart, all alike: the logo (13px; Herdr's own program icon, `icons/claude.svg` / `icons/codex.svg` in the Herdr home, as the tab bar shows it), then two lines, `5h` over `7d` (10px terminal font, `dim`, 11px line
   height), each with a 30×3px bar on a `border` track.
 - Bars show what's left. Fill `muted`; `ansi3` under 30% left.
 - No reading yet: the logo at 40%. A failed reading with an older one: bars at 50%.
@@ -69,4 +69,4 @@ the bottom status row, one panel. This is the brief; the files beside it are one
 - `lib/` (pure, `node --test`): `format.js`, `claude.js`, `codex.js`, `accounts.js`,
   `plan.js`, `layout.js`, `name.js`. Tests in `agent-usage/tests/`, fake CLIs in `agent-usage/tests/fake/`.
 - `host/`: `poll.js` (find and ask), `bar.js`, `panel.js`, `look.js` (logo, bar, badge).
-- `helpers/`: the two POSIX scripts. `icons/`: the two marks, from LobeHub Icons (MIT; see README).
+- `helpers/`: the two POSIX scripts. No icons of its own: the logos are Herdr's program icons.

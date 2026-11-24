@@ -8,9 +8,10 @@ import { isLow, fillWidth, monoFont } from "../lib/format.js";
 /** The terminal's font, read each render so a change in Settings shows at once. */
 export const mono = () => monoFont(settings());
 
-/** Each provider's mark in its own colours (`icons/<provider>.svg`). */
+/** Each provider's mark as Herdr's own program table draws it (`icons/<provider>.svg` in the
+ *  Herdr home), so it matches the tab bar, toasts and sidebars. */
 export function logo(provider, size, t) {
-  return image(`${DIR}/icons/${provider}.svg`).size(size).flex_none();
+  return image(`icons/${provider}.svg`).size(size).flex_none();
 }
 
 export const fillColor = (pct, t) => (isLow(pct) ? t.ansi3 : t.muted);
