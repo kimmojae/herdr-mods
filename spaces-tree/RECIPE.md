@@ -114,6 +114,16 @@ each in a box of its own height (40px with a second line, else 28px).
   the whole repo); one whose space is gone goes when its machine is ready. A group fold stays
   while some heading there falls in that group (header shown or not), and while the rules
   aren't read or aren't valid JSON (an edit half done keeps the folds).
+- Reveal the focused place when something happens there (`lib/reveal.js`): a pass whose
+  `moment` differs from the last one's (the focused pane or terminal; the lit agent's status,
+  as when a prompt is sent or it finishes; the shown tab's `changed_at`; a tab or pane opened or
+  closed in the shown space; the rows above the target, as when its git comes in; the first pass
+  counts) opens the folded machine, group, repo or folder heading and parent agents above the
+  target, stored as a chevron click would; siblings stay folded, and the list scrolls to it as
+  for a new shown space. The target is the lit row as if nothing were folded, else the shown
+  space's row. Between events nothing is forced: a fold made by hand stays folded until the next
+  one. A pinned agent opens nothing; nor does a pass within 1s of a press in the list (a folded
+  folder heading's click selects its space).
 
 ### Repo groups (rules)
 

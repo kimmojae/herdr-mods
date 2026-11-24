@@ -21,6 +21,7 @@ import { presence, presenceState } from "./lib/presence.js";
 import { track } from "./lib/time.js";
 import { assignColors } from "./lib/colors.js";
 import { readFolds, writeFolds, pruneFolds, migrateFolds } from "./lib/folds.js";
+import { ancestors, revealKeys, nothing, moment } from "./lib/reveal.js";
 import { GitWatch } from "./host/git.js";
 import { PrWatch } from "./host/pr.js";
 import { Machines } from "./host/machines.js";
@@ -72,6 +73,7 @@ class SpacesTree extends View {
     this.litAt = -1; // the shown space's row among the list's direct children, -1 when not drawn
     this.revealed = undefined;
     this.revealedAt = -1; // space rows before the shown one at the last reveal
+    this.moment = undefined; // what happened in the focused place at the last pass (reveal)
     this.aboveSig = "";
     this.sizeSig = "";
     // The band's and PINNED's rows and sections coming and going (lib/presence.js), and until
@@ -189,6 +191,36 @@ class SpacesTree extends View {
     if (groups && pruneGroupOrder(this.groupOrder, this.rules.rules, ms)) {
       try { localStorage.setItem(GROUP_ORDER, writeGroupOrder(this.groupOrder)); } catch {}
     }
+  }
+
+  /**
+   * Reveal the focused place when something happens there (lib/reveal.js moment: focus moved,
+   * the lit agent's status changed, the shown tab changed state, a tab or pane opened or closed
+   * in the shown space; the first pass counts): the folded machine, group, heading and agent
+   * rows above it open, stored as a click on their chevrons would. Between events nothing is
+   * forced: a fold made by hand stays. The target is the lit row as if nothing were folded,
+   * else the shown space's row; a pinned agent opens nothing. Not right after a press in the
+   * list (a folded folder heading's click selects its space, which would open it again). True
+   * when something opened.
+   */
+  reveal(open, foc, ag, subs, sp, ps, now) {
+    const lit = litRow({ focused: foc, agents: ag, subs, spaces: sp, rows: [...open.pinned, ...open.tree] });
+    const shown = sp.find((s) => s.active);
+    const target = lit ?? (shown ? { space: shown.id } : null);
+    const status = lit && "address" in lit ? [...ag, ...subs].find((a) => a.address === lit.address)?.status : null;
+    const m = moment({ focused: foc, target, above: ancestors(open.tree, target).map((r) => r.key), status, space: shown, panes: ps });
+    if (m === this.moment) return false;
+    this.moment = m;
+    if (now - this.pressedAt <= PRESS_QUIET) return false;
+    const k = revealKeys(open.tree, target, { headings: this.folds, machines: this.machines.folded, agents: this.foldedAgents });
+    if (nothing(k)) return false;
+    for (const mc of k.machines) this.machines.toggle(mc);
+    for (const a of k.agents) this.foldedAgents.delete(a);
+    if (k.headings.length) {
+      for (const h of k.headings) this.folds.delete(h);
+      try { localStorage.setItem(SPACES_FOLDED, writeFolds(this.folds)); } catch {}
+    }
+    return true;
   }
 
   toggleSettled() {
@@ -341,8 +373,15 @@ class SpacesTree extends View {
     const subs = subAgents(terms, ag);
     const groups = this.groupsOf(sp, ps);
     const input = { spaces: sp, agents: ag, subs, leads: leadPanes(ps), git, multiMachine: multi, groups };
+    // The tree with nothing folded: what agent.next / agent.prev walk, and where reveal looks.
+    const open = buildTree({ ...input, folded: new Set(), foldedMachines: new Set(), foldedAgents: new Set() });
+    const rail = narrow();
+    // Not on the rail (it draws no rows): the list looks again when it comes back. What it
+    // opened, the list scrolls to (as for a new shown space).
+    if (!rail && this.reveal(open, foc, ag, subs, sp, ps, now)) this.revealed = undefined;
     const folded = new Set(this.folds.keys());
-    const built = buildTree({ ...input, folded, foldedMachines: this.machines.folded, foldedAgents: this.foldedAgents });
+    const built = !folded.size && !this.machines.folded.size && !this.foldedAgents.size ? open
+      : buildTree({ ...input, folded, foldedMachines: this.machines.folded, foldedAgents: this.foldedAgents });
     // Core order: spaces() order with each repo's spaces kept together at its first space
     // (lib/tree.js coreOrder): every space, folded or hidden ones too, and never grouped by
     // machine (that grouping is display-only, in arrange()).
@@ -371,7 +410,6 @@ class SpacesTree extends View {
       git,
       paneList: ps,
     };
-    const rail = narrow();
 
     // The list's direct children; the shown space's index among them is the scroll target
     // (machine headers, login notes and loading rows count too).
@@ -411,8 +449,6 @@ class SpacesTree extends View {
     if (!rail) children.push(...this.below(built.settled.filter((r) => this.shown.has(r.space)), t));
     // agent.next / agent.prev walk every agent: pinned, then the tree in display order, each
     // once (not the band). A fold is visual only, and a space still waiting for its git counts.
-    const open = !folded.size && !this.machines.folded.size && !this.foldedAgents.size ? built
-      : buildTree({ ...input, folded: new Set(), foldedMachines: new Set(), foldedAgents: new Set() });
     const flat = this.arrange(open.tree, remote).flatMap((g) => g.rows);
     setAgentOrder(agentOrder({ pinned: open.pinned, tree: flat }, ctx.kept));
 
